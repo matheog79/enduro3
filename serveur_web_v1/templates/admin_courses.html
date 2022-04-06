@@ -1,0 +1,110 @@
+<!-- On va dériver la layout.html de base -->
+{% extends "admin_layout.html" %}
+
+
+{% block javascript %}    <!-- Début du block javascript -->
+{% endblock %}  <!-- Fin du block javascript -->
+
+
+{% block body %}    <!-- Début du block body -->
+
+
+<!-- Bandeau pour erreurs et notifications -->
+<div class="row">
+    <div class="col-lg-12">
+        <div id="admin_erreur">
+            {% for category, message in get_flashed_messages(with_categories=true) %}
+            <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div><!-- row -->
+
+<!-- Contenu de la page -->
+<div class="row">
+  <div class="col-lg-12">
+
+    <div class="row">
+      <h1>Nouvelle course</h1>
+      <p class="font-italic">Cliquer dans la zone date pour afficher le calendrier et choisir la bonne date. Cette date doit nécessairement être dans le futur, voire le jour même.</p>
+    </div>
+
+    <div class="row">
+      <form action="{{ url_for('administrer_courses_ajouter') }}" method="post">
+        <div class="form-row">
+          <div class="col">
+            <input class="form-control" type="date" name="date_de_la_course">
+          </div>
+          <div class="col">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter</button>
+          </div>
+        </form>
+      </div><!-- row -->
+    </div>
+    <br /><br />
+
+    <div class="row">
+      <h1>Liste des courses</h1>
+      <p class="font-italic">Liste des courses dans la base de données.
+        A noter qu'il n'est possible de supprimer que les courses où il n'y a pas de passages.
+        Car la suppression d'une course, supprime automatiquement ses coureurs et les passages des coureurs.
+        A noter également qu'une course ajoutée est forcément actuelle et donc la course du moment. Il ne doit y en avoir qu'une seule.
+      </p>
+      <table class="table table-striped">
+        <thead><tr><th>ID</th><th>Date</th><th>Active</th><th>Archive</th><th>Coureurs</th><th>Passages</th><th>Actions</th></tr></thead>
+        <tbody>
+        {% if les_courses %}
+          {% for une_course in les_courses %}
+            <tr>
+              <td>{{ une_course[0] }}</td><!-- id -->
+              <td>{{ une_course[1] }}</td><!-- date -->
+              {% if une_course[2] == 0 %}
+                <td><i class="far fa-square"></i></td><!-- active -->
+              {% else %}
+                <td><i class="far fa-check-square"></i></td><!-- active -->
+              {% endif %}
+              {% if une_course[3] == 0 %}
+                <td><i class="fas fa-lock-open"></i></td><!-- archive -->
+              {% else %}
+                <td><i class="fas fa-lock"></i></td><!-- archive -->
+              {% endif %}
+              <td>{{ une_course[4] }}</td><!-- nb coureurs -->
+              <td>{{ une_course[5] }}</td><!-- nb passages -->
+              <td>
+              {% if une_course[3] == 1 %}
+                <button class="btn btn-danger btn-sm" disabled><i class="fas fa-trash-alt"></i> Supprimer</button>
+                <button class="btn btn-primary btn-sm" disabled><i class="fas fa-database"></i> Archiver</button>
+                <button class="btn btn-success btn-sm" disabled><i class="fas fa-check"></i> Choisir</button>
+              {% else %}
+                <a href="{{ url_for('administrer_courses_supprimer', id_course=une_course[0]) }}">
+                  <button class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i> Supprimer</button>
+                </a>
+                <a href="{{ url_for('administrer_courses_archiver', id_course=une_course[0]) }}">
+                  <button class="btn btn-primary btn-sm"><i class="fas fa-database"></i> Archiver</button>
+                </a>
+                {% if une_course[2] == 0 %}
+                <a href="{{ url_for('administrer_courses_choisir', id_course=une_course[0]) }}">
+                  <button class="btn btn-success btn-sm"><i class="fas fa-check"></i> Choisir</button>
+                </a>
+                {% else %}
+                <button class="btn btn-success btn-sm" disabled><i class="fas fa-check"></i> Choisir</button>
+                {% endif %}
+              {% endif %}
+
+
+              </td>
+            </tr>
+          {% endfor %}
+        {% endif %}
+        </tbody>
+      </table>
+    </div><!-- row -->
+
+  </div>
+</div><!-- row -->
+
+
+
+
+
+{% endblock %}  <!-- Fin du block body -->

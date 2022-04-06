@@ -1,0 +1,64 @@
+<!-- On va dériver la layout.html de base -->
+{% extends "admin_layout.html" %}
+
+
+{% block javascript %}    <!-- Début du block javascript -->
+{% endblock %}  <!-- Fin du block javascript -->
+
+
+{% block body %}    <!-- Début du block body -->
+
+
+<!-- Bandeau pour erreurs et notifications -->
+<div class="row">
+    <div class="col-lg-12">
+        <div id="admin_erreur">
+            {% for category, message in get_flashed_messages(with_categories=true) %}
+            <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div><!-- row -->
+
+<!-- Titre -->
+<div class="row">
+  <h1>Etape #6 :: Suivi en direct de la course</h1>
+</div><!-- row -->
+
+
+<!-- Lien vers le suivi en direct live de la course -->
+<div class="row">
+  <h3>Live</h3>
+</div><!-- row -->
+<div class="row">
+  <p class="card-text font-italic">En cliquant sur le bouton ci-dessous, vous allez ouvrir un nouvel onglet dans le navigateur qui vous dirigera vers la page publique de suivi en direct de la course. Une fois la course terminée.</p>
+  <a href="{{ url_for('afficher_direct') }}" target="_blank" rel="noopener noreferrer">
+    <button class="btn btn-primary btn-sm"><i class="fas fa-heartbeat"></i> Etape #6 => Suivre la course en direct</button>
+  </a>
+</div>
+<br />
+<div class="row">
+  <p class="card-text font-italic">Une fois la course terminée, il faudra fermer cet onglet et revenir sur cette page pour poursuivre les étapes d'administration de la course.</p>
+</div>
+<br />
+
+
+
+
+<!-- Les boutons étapes suivante et précédente -->
+<div class="row">
+  <div class="col-sm">
+    <a href="{{ url_for('administrer_tutoriel_etape5') }}">
+      <button class="btn btn-primary btn-sm"><i class="fas fa-step-backward"></i> Etape #5</button>
+    </a>
+  </div><!-- col -->
+  <div class="col-sm">
+    <a href="{{ url_for('administrer_tutoriel_etape7') }}">
+      <button class="btn btn-primary btn-sm"><i class="fas fa-step-forward"></i> Etape #7</button>
+    </a>
+  </div><!-- col -->
+</div><!-- row -->
+
+
+
+{% endblock %}  <!-- Fin du block body -->

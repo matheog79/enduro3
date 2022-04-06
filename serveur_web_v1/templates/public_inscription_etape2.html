@@ -1,0 +1,45 @@
+<!-- On va dériver la layout.html de base -->
+{% extends "public_layout.html" %}
+
+
+{% block javascript %}    <!-- Début du block javascript -->
+{% endblock %}  <!-- Fin du block javascript -->
+
+
+{% block body %}    <!-- Début du block body -->
+
+<div class="row">
+	<div class="col-lg-12">
+		<div id="admin_donnees">
+			<h1 class="text_center">[ Inscription ]</h1>
+			{% if not deja_inscrit %}
+			<div class="jumbotron">
+				<br>
+    		<p class="text_center">Pour vous inscrire à l'<strong>Enduro</strong> veuillez renseignez les champs suivants sous la forme: <strong>BEGOOD JOHNNY SNIR2 3</strong></p>
+    		<br>
+	    </div>
+    </div>
+	</div>
+	<div class="col-lg- text_center">
+		<form action="{{ url_for('inscription') }}" method="post" class="form-example">
+			<div class="form-example">
+				<input type="text" name="nom_inscription" placeholder="Nom" size="20">
+				<input type="text" name="prenom_inscription" placeholder="Prenom" size="20">
+				<input type="text" name="classe_inscription" placeholder="Classe" size="20">
+				<input type="text" name="parrainage_inscription" placeholder="Argent/tour" size="20">
+			</div>
+			<br>
+			<div class="text-center">
+				<button type="submit" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> S'inscrire </button>
+			</div>
+		</form>
+	</div>
+	{% endif %}
+
+<div class="container">
+	{% if deja_inscrit %}
+	<p>non</p>
+	{% endif %}
+</div>
+
+{% endblock %}  <!-- Fin du block body -->

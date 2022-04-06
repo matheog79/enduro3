@@ -1,0 +1,56 @@
+<!-- On va dériver la layout.html de base -->
+{% extends "admin_layout.html" %}
+
+
+{% block javascript %}    <!-- Début du block javascript -->
+{% endblock %}  <!-- Fin du block javascript -->
+
+
+{% block body %}    <!-- Début du block body -->
+
+
+<!-- Bandeau pour erreurs et notifications -->
+<div class="row">
+  <div class="col-lg-12">
+    <div id="admin_erreur">
+      {% for category, message in get_flashed_messages(with_categories=true) %}
+      <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+      {% endfor %}
+    </div>
+  </div>
+</div><!-- row -->
+
+<!-- Contenu de la page -->
+<div class="row">
+  <div class="col-lg-12">
+    <div id="admin_donnees">
+      <h1 class="text_center">[ Accueil ]</h1>
+        <div class="jumbotron">
+          <p class="text_center">Bienvenue dans la zone d'administration de la course <strong>ENDURO</strong> du lycée Saint-André.</p>
+          <br>
+        </div><!-- jumbotron -->
+
+        {% if session.authentifie %}
+        <!-- Les boutons étapes suivante et précédente -->
+        <div class="row">
+          <div class="col-sm">
+          </div><!-- col -->
+          <div class="text_center">
+            <a href="{{ url_for('administrer_tutoriel_etape1') }}">
+              <button class="btn btn-primary btn-sm"><i class="fas fa-step-forward"></i> Etape #1</button>
+            </a>
+          </div><!-- col -->
+        </div><!-- row -->
+        {% endif %}
+
+
+      </div>
+    </div>
+  </div>
+</div><!-- row -->
+
+
+
+
+
+{% endblock %}  <!-- Fin du block body -->
