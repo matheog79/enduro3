@@ -15,10 +15,10 @@
 			{% if not deja_inscrit %}
 			<div class="jumbotron">
 				<br>
-    		<p class="text_center">Pour vous inscrire à l'<strong>Enduro</strong> veuillez renseignez les champs suivants sous la forme: <strong>BEGOOD JOHNNY SNIR2 3</strong></p>
-    		<br>
-	    </div>
-    </div>
+	    		<p class="text_center">Pour vous inscrire à l'<strong>Enduro</strong> veuillez renseignez les champs suivants sous la forme: <strong>BEGOOD JOHNNY SNIR2 3</strong></p>
+	    		<br>
+		    </div>
+    	</div>
 	</div>
 	<div class="col-lg- text_center">
 		<form action="{{ url_for('inscription') }}" method="post" class="form-example">
@@ -38,7 +38,19 @@
 
 <div class="container">
 	{% if deja_inscrit %}
-	<p>non</p>
+	<div class="jumbotron">
+		<br>
+		<p class="text_center">Vous êtes déjà inscrit pour l'<strong>Enduro</strong>, vous pouvez néanmoins l'a modifier ou l'a supprimer.</p>
+		<br>
+    </div>
+    <div class="text-center">
+    	<a href="{{ url_for('afficher_inscription_etape3') }}">
+			<button type="submit" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> Modifier </button>
+		</a>
+		<a href="{{ url_for('afficher_inscription_suppression') }}">
+			<button type="submit" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> Supprimer </button>
+		</a>
+	</div>
 	{% endif %}
 </div>
 
