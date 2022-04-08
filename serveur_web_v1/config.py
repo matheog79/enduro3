@@ -32,7 +32,7 @@ class Config(object):
 
     # Paramètres pour accéder à la base de données hébergée sur un serveur
     # MySQL (ou MariaDB)
-    BDD_HOST = "192.168.1.156"
+    BDD_HOST = "10.231.1.189"
     BDD_NAME = "enduro"
     BDD_USER_IHM = "matheo"
     BDD_PASSWORD_IHM = "matheo"

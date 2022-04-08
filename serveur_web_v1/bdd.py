@@ -257,6 +257,31 @@ class Bdd():
         return resultats
 
 
+    def supprimer_coureur(self, nom_inscrit_supr, prenom_inscrit_supr, classe_inscrit_supr):
+        """Méthodes pour retirer un élève de la base de donnée
+        @param nom, prenom, classe, parrainage
+        @return ...
+        """
+
+        if self.debug == True:
+            print("Bdd::supprimer_coureur()")
+
+        #Suppression de l'élève
+        resultats = None
+        parametres = (nom_inscrit_supr, prenom_inscrit_supr, classe_inscrit_supr)
+        requete_sql = """
+        DELETE FROM enduro.coureurs
+        WHERE enduro.coureurs.nom = %s
+        AND enduro.coureurs.prenom = %s
+        AND enduro.coureurs.classe = %s;"""
+
+        #Éxécution de la requête
+        resultats = self.executer_requete_sql_en_ecriture(requete_sql, parametres)
+
+        #Retourne les résultats
+        return resultats
+
+
     # ==========================================================================
     # Méthodes pour la partie administration
     # ==========================================================================

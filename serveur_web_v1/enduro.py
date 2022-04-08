@@ -66,6 +66,23 @@ def afficher_inscription():
 	"""
 	return render_template('public_inscription.html')
 
+@app.route('/inscription/modification')
+def afficher_inscription_etape3():
+	"""Fonction pour gérer les inscription
+	@param Aucun
+	@return le template
+	"""
+	return render_template('public_inscription_etape3.html')
+
+@app.route('/inscription/suppression/en_cours')
+def afficher_inscription_suppression():
+	"""Fonction pour gérer les inscription
+	@param Aucun
+	@return le template
+	"""
+	return render_template('public_inscription_etape4.html')
+
+
 @app.route('/credits')
 def afficher_credits():
 	"""Fonction pour afficher les crédits
@@ -73,6 +90,31 @@ def afficher_credits():
 	@return le template
 	"""
 	return render_template('public_credits.html')
+
+@app.route('/inscription/suppression/en_cours', methods=["POST"])
+def inscription_suppression():
+	"""Fonction pour gérer les inscription
+	@param Aucun
+	@return le template
+	"""
+
+	#Récupératoin des paramètres de la requête
+	nom_inscrit_supr = request.form["nom_inscrit_supr"]
+	prenom_inscrit_supr = request.form["prenom_inscrit_supr"]
+	classe_inscrit_supr = request.form["classe_inscrit_supr"]
+	print("nom =>", nom_inscrit_supr)
+	print("prenom =>", prenom_inscrit_supr)
+	print("classe =>", classe_inscrit_supr)
+
+	#Envoie de la requête SQL
+	try:
+		suppression_coureur = bdd.supprimer_coureur(nom_inscrit_supr, prenom_inscrit_supr, classe_inscrit_supr)
+		print(suppression_coureur)
+
+	except ErreurBdd as erreur:
+		flash("une erreur est survenue (%s)" % erreur, "danger")
+
+	return render_template('public_inscription_etape4.html')
 
 @app.route('/inscription/recherche', methods=["POST"])
 def recherche_inscrit():
