@@ -68,7 +68,7 @@ def afficher_inscription():
 	"""
 	return render_template('public_inscription.html')
 
-@app.route('/inscription/modification')
+@app.route('/inscription')
 def afficher_inscription_etape3():
 	"""Fonction pour gérer les inscription
 	@param Aucun
@@ -76,7 +76,7 @@ def afficher_inscription_etape3():
 	"""
 	return render_template('public_inscription_etape3.html')
 
-@app.route('/inscription/suppression/en_cours')
+@app.route('/inscription')
 def afficher_inscription_suppression():
 	"""Fonction pour gérer les inscription
 	@param Aucun
@@ -93,7 +93,7 @@ def afficher_credits():
 	"""
 	return render_template('public_credits.html')
 
-@app.route('/inscription/suppression/en_cours', methods=["POST"])
+@app.route('/inscription', methods=["POST"])
 def inscription_suppression():
 	"""Fonction pour gérer les inscription
 	@param Aucun
@@ -118,7 +118,7 @@ def inscription_suppression():
 
 	return render_template('public_inscription_etape4.html')
 
-@app.route('/inscription/recherche', methods=["POST"])
+@app.route('/inscription', methods=["POST"])
 def recherche_inscrit():
 	"""Fonction pour afficher l'étape 1 de l'inscription
 	@param Aucun
@@ -148,7 +148,7 @@ def recherche_inscrit():
 
 	return render_template('public_inscription_etape2.html', deja_inscrit=deja_inscrit)
 
-@app.route('/inscription/en_cours', methods=["POST"])
+@app.route('/inscription', methods=["POST"])
 def inscription():
 	"""Fonction pour afficher l'inscription
 	@param Aucun
@@ -260,13 +260,13 @@ def administrer_tutoriel_etape4():
 		return redirect(url_for("afficher_accueil_admin"))
 
 	# Récupération des courses récentes
-	try:
-		les_courses = bdd.recuperer_courses_recentes()
-	except ErreurBdd as e:
-		flash("Une erreur est survenue (%s)" % e, "danger")
+	#try:
+	#	les_courses = bdd.recuperer_courses_recentes()
+	#except ErreurBdd as e:
+	#	flash("Une erreur est survenue (%s)" % e, "danger")
 
 	# On retourne le template
-	return render_template('admin_tutoriel_etape4.html', les_courses=les_courses)
+	return render_template('admin_tutoriel_etape4.html')#, les_courses=les_courses)
 
 
 
@@ -544,10 +544,7 @@ def administrer_courses_exporter(id_course):
 	# On redirige l'utilisateur vers la page d'accueil
 	return redirect(url_for("administrer_tutoriel_etape8"))
 
-	"""
-	#
 	# Export HTML
-	#
 	# Exportation des résultats de la course en HTML
 	try:
 		les_coureurs = bdd.exporter_une_course(id_course)
@@ -557,7 +554,7 @@ def administrer_courses_exporter(id_course):
 
 	# On redirige l'utilisateur vers la page d'accueil
 	return render_template('admin_export.html', les_coureurs=les_coureurs, formater_temps=formater_temps)
-	"""
+	
 
 @app.route('/administration/courses/reinitialiser/<int:id_course>')
 def administrer_courses_reinitialiser(id_course):

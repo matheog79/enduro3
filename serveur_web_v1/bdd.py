@@ -1,7 +1,7 @@
 # ==============================================================================
 # Les librairies utilisées
 # ==============================================================================
-import mysql.connector
+import sqlite3
 from datetime import datetime
 import csv
 import subprocess
@@ -75,19 +75,16 @@ class Bdd():
                 print("  + objet Connection =>", self.cnx)
             """
             # Connexion au serveur MySQL (avec un pool de connexions)
-            self.cnx = mysql.connector.connect(
-                pool_name = "enduropool",
-                pool_size = 10,
-                **self.configuration)
+            self.con = sqlite3.connect('dump_bdd_26102018.db')
 
             # Création d'un object Cursor pour effectuer les requêtes
-            if self.cnx is not None and self.cnx.is_connected() == True:
-                self.cur = self.cnx.cursor()
+            if self.con is not None and self.con.is_connected() == True:
+                self.cur = self.con.cursor()
             else:
                 raise ErreurBdd(0, "Pas de connexion pour créer le curseur")
 
-        except mysql.connector.Error as erreur:
-            print("EXCEPTION [mysql.connector.Error] dans Bdd::se_connecter() =>", erreur)
+        except sqlite3.Error as erreur:
+            print("EXCEPTION [sqlite3.Error] dans Bdd::se_connecter() =>", erreur)
             print("  + traceback :", traceback.print_exc() )
             raise ErreurBdd(0, erreur)
 
@@ -108,11 +105,11 @@ class Bdd():
                 self.cur.close()
 
             # Fermeture de la Connexion
-            if self.cnx is not None and self.cnx.is_connected() == True:
-                self.cnx.close()
+            if self.con is not None and self.con.is_connected() == True:
+                self.con.close()
 
-        except mysql.connector.Error as erreur:
-            print("EXCEPTION [mysql.connector.Error] dans Bdd::se_deconnecter() =>", erreur)
+        except sqlite3.Error as erreur:
+            print("EXCEPTION [sqlite3.Error] dans Bdd::se_deconnecter() =>", erreur)
             print("  + traceback :", traceback.print_exc() )
             raise ErreurBdd(0, erreur)
 
@@ -143,9 +140,9 @@ class Bdd():
             # Déconnexion de la base de données
             self.se_deconnecter()
 
-        except mysql.connector.Error as erreur:
+        except sqlite3.Error as erreur:
             # On fait remonter l'erreur
-            print("EXCEPTION [mysql.connector.Error] dans Bdd::executer_requete_sql_en_lecture()")
+            print("EXCEPTION [sqlite3.Error] dans Bdd::executer_requete_sql_en_lecture()")
             print("  + message =", erreur)
             print("  + detail requete =", self.cur._last_executed)
             print("  + traceback :", traceback.print_exc() )
@@ -180,7 +177,7 @@ class Bdd():
             self.cur.execute(requete_sql, parametres)
 
             # Applications des changements
-            self.cnx.commit()
+            self.con.commit()
             resultat = self.cur.lastrowid
             print("dans executer_requete_sql_en_ecriture() =>", resultat)
 
@@ -189,7 +186,7 @@ class Bdd():
 
         except mysql.connector.Error as erreur:
             # Annulation des changements
-            self.cnx.rollback()
+            self.con.rollback()
 
             # Affichage de l'erreur
             print("EXCEPTION [mysql.connector.Error] dans Bdd::executer_requete_sql_en_ecriture()")
@@ -219,13 +216,14 @@ class Bdd():
 
         #Recherche de la personne
         resultats = None
-        parametres = (nom_inscrit, prenom_inscrit, classe_inscrit)
+        parametres = (nom_inscrit, prenom_inscrit, classe_inscrit, id_course)
         requete_sql = """
-        SELECT enduro.coureurs.nom, enduro.coureurs.prenom, enduro.coureurs.classe
+        SELECT enduro.coureurs.nom, enduro.coureurs.prenom, enduro.coureurs.classe, enduro.coureurs.id_course_fk
         FROM enduro.coureurs
         WHERE enduro.coureurs.nom = %s
         AND enduro.coureurs.prenom = %s
-        AND enduro.coureurs.classe = %s;"""
+        AND enduro.coureurs.classe = %s
+        AND enduro.coureurs.id_course_fk = %s;"""
 
         #Éxécution de la requête
         resultats = self.executer_requete_sql_en_lecture(requete_sql, parametres)
@@ -245,10 +243,10 @@ class Bdd():
 
         #Inscription de l'élève
         resultats = None
-        parametres = (nom_inscription, prenom_inscription, classe_inscription, parrainage_inscription)
+        parametres = (nom_inscription, prenom_inscription, classe_inscription, parrainage_inscription, id_course)
         requete_sql = """
-        INSERT INTO enduro.coureurs (nom, prenom, classe, parrainage)
-        VALUES (%s, %s, %s, %s);"""
+        INSERT INTO enduro.coureurs (nom, prenom, classe, parrainage, id_course_fk)
+        VALUES (%s, %s, %s, %s, %s);"""
 
         #Éxécution de la requête
         resultats = self.executer_requete_sql_en_ecriture(requete_sql, parametres)
@@ -268,12 +266,13 @@ class Bdd():
 
         #Suppression de l'élève
         resultats = None
-        parametres = (nom_inscrit_supr, prenom_inscrit_supr, classe_inscrit_supr)
+        parametres = (nom_inscrit_supr, prenom_inscrit_supr, classe_inscrit_supr, id_course)
         requete_sql = """
         DELETE FROM enduro.coureurs
         WHERE enduro.coureurs.nom = %s
         AND enduro.coureurs.prenom = %s
-        AND enduro.coureurs.classe = %s;"""
+        AND enduro.coureurs.classe = %s
+        AND enduro.coureurs.id_course_fk = %s;"""
 
         #Éxécution de la requête
         resultats = self.executer_requete_sql_en_ecriture(requete_sql, parametres)
