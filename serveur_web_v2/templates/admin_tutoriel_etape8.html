@@ -1,0 +1,71 @@
+<!-- On va dériver la layout.html de base -->
+{% extends "admin_layout.html" %}
+
+
+{% block javascript %}    <!-- Début du block javascript -->
+<script src="{{ url_for('static', filename='js/qrcode/qrcode.min.js') }}" type="text/javascript"></script>
+{% endblock %}  <!-- Fin du block javascript -->
+
+
+{% block body %}    <!-- Début du block body -->
+
+
+<!-- Bandeau pour erreurs et notifications -->
+<div class="row">
+    <div class="col-lg-12">
+        <div id="admin_erreur">
+            {% for category, message in get_flashed_messages(with_categories=true) %}
+            <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div><!-- row -->
+
+<!-- Titre -->
+<div class="row">
+  <h1>Etape #8 :: Partage des résultats</h1>
+</div><!-- row -->
+
+
+<!-- QR code de partage -->
+<div class="row">
+  <h3>QR code</h3>
+</div>
+<div class="row">
+  <p class="card-text font-italic">Scanner le QR code ci-dessous pour accéder aux résultats de la course...</p>
+</div><br />
+<div class="row">
+  <div id="qrcode"></div>
+  <script type="text/javascript">
+    //new QRCode(document.getElementById("qrcode"), "{{ url_for('afficher_resultats') }}");
+    var qrcode = new QRCode(document.getElementById("qrcode"), {
+      text: "{{ url_for('afficher_resultats', _external=True) }}",
+      width: 500,
+      height: 500,
+      colorDark : "#000000",
+      colorLight : "#ffffff",
+      correctLevel : QRCode.CorrectLevel.H
+  });
+  </script>
+</div><br />
+<div class="row">
+  <p class="card-text font-italic">... ou sinon via l'URL suivante :&nbsp;</p>
+    <a href="{{ url_for('afficher_resultats', _external=True) }}">{{ url_for('afficher_resultats', _external=True) }}</a>
+</div>
+<br />
+
+
+<!-- Les boutons étapes suivante et précédente -->
+<div class="row">
+  <div class="col-sm">
+    <a href="{{ url_for('administrer_tutoriel_etape7') }}">
+      <button class="btn btn-primary btn-sm"><i class="fas fa-step-backward"></i> Etape #7</button>
+    </a>
+  </div><!-- col -->
+  <div class="col-sm">
+  </div><!-- col -->
+</div><!-- row -->
+
+
+
+{% endblock %}  <!-- Fin du block body -->

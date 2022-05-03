@@ -1,0 +1,79 @@
+<!-- On va dériver la layout.html de base -->
+{% extends "admin_layout.html" %}
+
+
+{% block javascript %}    <!-- Début du block javascript -->
+{% endblock %}  <!-- Fin du block javascript -->
+
+
+{% block body %}    <!-- Début du block body -->
+
+
+<!-- Bandeau pour erreurs et notifications -->
+<div class="row">
+    <div class="col-lg-12">
+        <div id="admin_erreur">
+            {% for category, message in get_flashed_messages(with_categories=true) %}
+            <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div><!-- row -->
+
+<!-- Titre -->
+<div class="row">
+  <h1>Liste des coureurs</h1>
+</div><!-- row -->
+
+<!-- Choix de la course -->
+<div class="row">
+  <form action="{{ url_for('administrer_coureurs_afficher') }}" method="post" enctype="multipart/form-data">
+    <fieldset>
+      <div class="form-group">
+        <label for="exampleFormControlSelect1">Sélectionner la course</label>
+        <select class="form-control" name="id_course" id="exampleFormControlSelect1">
+        {% if les_courses %}
+          {% for une_course in les_courses %}
+            <option value="{{ une_course[0] }}">{{ une_course[1] }}</option>
+          {% endfor %}
+        {% endif %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Afficher les coureurs</button>
+    </fieldset>
+  </form>
+</div><!-- row -->
+<br />
+
+<!-- Tableau des participants -->
+<div class="row">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nom</th>
+        <th>Prénom</th>
+        <th>Classe</th>
+        <th>Parrainage</th>
+      </tr></thead>
+    <tbody>
+    {% for un_coureur in les_coureurs %}
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div><!-- row -->
+
+
+
+
+
+
+
+{% endblock %}  <!-- Fin du block body -->

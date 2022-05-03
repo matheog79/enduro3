@@ -1,0 +1,144 @@
+<!--
+@brief Fichier principal de la page d'affichage
+@author David SALLE
+@date 29/03/2017
+@version 0.1
+@licence GPL3
+-->
+<!DOCTYPE html>
+<html lang="fr">
+
+  <head>
+    <!-- Général -->
+    <meta charset="utf-8" />
+    <title>Course ENDURO</title>
+
+    <!-- CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet" /> <!-- Bootstrap -->
+    <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet" /> <!-- custom styles -->
+    <link href="{{ url_for('static', filename='css/Enduro_Static.css') }}" rel="stylesheet" />
+    <link href="{{ url_for('static', filename='css/all.min.css') }}" rel="stylesheet" /> <!-- icons font awesome -->
+    
+
+    <!-- Javascript -->
+    <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}" type="text/javascript"></script>
+    {% block javascript %}{% endblock %}
+  </head>
+
+<body>
+
+    <!-- Barre de navigation -->
+    <nav class="navbar-form navbar-hide">
+
+      <div class="nav-link">
+        <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+          <div>
+            <a href="{{ url_for('afficher_accueil') }}"><img src="{{ url_for('static', filename='images/logo_saint_andre.png') }}"></a>
+          </div>
+          <div class="content">
+            <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+          {% if not session.authentifie %}
+          {% else %}
+
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('afficher_accueil_admin') }}">
+             <button type="button" class="btn nav-link px-2 link-dark">Accueil</button>
+            </a>
+          </li>
+
+          <li class="nav-item dropdown">
+            <div class="nav-link">
+              <button type="button" class="btn nav-link px-2 link-dark dropdown-toggle" role="button" data-toggle="dropdown">Courses</button>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="{{ url_for('administrer_courses') }}">Afficher/ajouter/supprimer</a>
+                <a class="dropdown-item" href="#">Exporter résultats en HTML</a>
+
+              </div>
+            </div>
+          </li>
+
+          <li class="nav-item dropdown">
+            <div class="nav-link">
+              <button type="button" class="btn nav-link px-2 link-dark dropdown-toggle" role="button" data-toggle="dropdown">Coureurs</button>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="{{ url_for('administrer_coureurs_afficher') }}">Afficher</a>
+                <a class="dropdown-item" href="{{ url_for('administrer_coureurs') }}">Importer depuis CSV</a>
+              </div>
+            </div>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('administrer_logiciels_lister') }}">
+              <button type="button" class="btn btn-secondary">Logiciels</button>
+            </a>
+          </li>
+
+        {% endif %}
+
+        <!-- Formulaire d'authentification -->
+        {% if not session.authentifie %}
+        <div class="text-center">
+          <a href="#mymodal" class="trigger-btn" data-toggle="modal"><img src="{{ url_for('static', filename='images/login.png') }}"></img></a>
+          <p><h6 class="text_center text_deco">Veuillez vous connectez</h6></p>
+        </div>
+        <div id="mymodal" class="modal fade">
+          <div class="modal-dialog modal-login">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title">Admin Login</h4> 
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+              </div>
+              <div class="modal-body">
+                <form action="{{ url_for('administrer_login') }}" method="post" class="navbar-form navbar-right">
+                  <div class="form-group">
+                    <input type="text" name="login" class="form-control" placeholder="login" size="10">
+                  </div>
+                  <div class="form-group">
+                    <input type="password" name="password" class="form-control" placeholder="password" size="10">
+                  </div>
+                  <div class="form-group text-center">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> S'authentifier</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+
+        {% if session.authentifie %}
+          <form action="{{ url_for('administrer_logout') }}" method="post" class="navbar-form">
+            <div class="form-row">
+              <div class="col">
+                <button type="submit" class="btn btn-default"><img src="{{ url_for('static', filename='images/logout.png') }}"></button>
+              </div>
+            </div>
+          </form> 
+
+        {% endif %}
+
+        </ul>
+      </div>
+      <div class="col-md-1 align-items-center">
+        <img src="{{ url_for('static', filename='images/logo_icssa.png') }}">
+      </div>
+      </header>
+    </nav>
+
+    <!-- Contenu qui sera ajouté après héritage du layout.html -->
+    <main role="main" class="container">
+      {% block body %}{% endblock %}
+    </main><!-- fin de container -->
+
+    <!-- Pied de page -->
+    <footer>
+    </footer>
+
+    <!-- Javascript -->
+    <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}" type="text/javascript"></script>
+
+</body>
+</html>
