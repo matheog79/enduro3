@@ -4,7 +4,7 @@ from datetime import timedelta, datetime
 import os
 import json
 import sys
-import psutil
+#import psutil
 import decimal
 from bdd import Bdd, ErreurBdd
 from enduro_MG import bpMG
@@ -696,6 +696,7 @@ def administrer_logiciels_lister():
 	logiciels["serveur_mqtt.py"] = {}
 
 	# Boucle de verification
+	"""
 	print(psutil.process_iter())
 	for proc in psutil.process_iter():
 		for clef in logiciels.keys():
@@ -705,7 +706,7 @@ def administrer_logiciels_lister():
 			else:
 				logiciels[clef]["lance"] = 0
 				logiciels[clef]["cpu"] = -1
-
+	"""
 	# On retourne les résultats intégrés au template
 	return render_template('admin_logiciels.html', logiciels=logiciels)
 
