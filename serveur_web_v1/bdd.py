@@ -41,21 +41,21 @@ class Bdd():
         if self.debug == True:
             print("Bdd::__init__()")
 
-        # Attributs de connexion à MySQL
+        # Attributs de connexion à Sqlite3
         self.adresse = ""
         self.utilisateur = ""
         self.mot_de_passe = ""
         self.nom = ""
         self.configuration = configuration
 
-        # Attributs de gestion de la connexion MySQL
+        # Attributs de gestion de la connexion Sqlite3
         self.cnx = None
         self.cur = None
 
 
 
     def se_connecter(self):
-        """Méthode pour se connecter à la base de données MySQL
+        """Méthode pour se connecter à la base de données Sqlite3
         @param configuration
         @return rien
         @throw Exception Si erreur de connexion
@@ -64,24 +64,12 @@ class Bdd():
             print("Bdd::se_connecter()")
 
         try:
-            """
-            # Connexion au serveur MySQL (méthode classique)
-            self.cnx = mysql.connector.connect(
-                host = self.adresse,
-                user = self.utilisateur,
-                password = self.mot_de_passe,
-                database = self.nom)
-            if self.debug == True:
-                print("  + objet Connection =>", self.cnx)
-            """
-            # Connexion au serveur MySQL (avec un pool de connexions)
+            
+            # Connexion au serveur sqlite (avec un pool de connexions)
             self.con = sqlite3.connect('dump_bdd_26102018.db')
 
             # Création d'un object Cursor pour effectuer les requêtes
-            if self.con is not None and self.con.is_connected() == True:
-                self.cur = self.con.cursor()
-            else:
-                raise ErreurBdd(0, "Pas de connexion pour créer le curseur")
+            self.cur = self.con.cursor()
 
         except sqlite3.Error as erreur:
             print("EXCEPTION [sqlite3.Error] dans Bdd::se_connecter() =>", erreur)
@@ -91,7 +79,7 @@ class Bdd():
 
 
     def se_deconnecter(self):
-        """Méthode pour se déconnecter à la base de données MySQL
+        """Méthode pour se déconnecter à la base de données Sqlite3
         @param aucun
         @return rien
         @throw Exception Si erreur de déconnexion
@@ -104,8 +92,6 @@ class Bdd():
             if self.cur is not None:
                 self.cur.close()
 
-            # Fermeture de la Connexion
-            if self.con is not None and self.con.is_connected() == True:
                 self.con.close()
 
         except sqlite3.Error as erreur:
@@ -144,7 +130,7 @@ class Bdd():
             # On fait remonter l'erreur
             print("EXCEPTION [sqlite3.Error] dans Bdd::executer_requete_sql_en_lecture()")
             print("  + message =", erreur)
-            print("  + detail requete =", self.cur._last_executed)
+            #print("  + detail requete =", self.cur._last_executed)
             print("  + traceback :", traceback.print_exc() )
             raise ErreurBdd(0, erreur)
 
@@ -184,14 +170,14 @@ class Bdd():
             # Déconnexion de la base de données
             self.se_deconnecter()
 
-        except mysql.connector.Error as erreur:
+        except sqlite3.Error as erreur:
             # Annulation des changements
             self.con.rollback()
 
             # Affichage de l'erreur
-            print("EXCEPTION [mysql.connector.Error] dans Bdd::executer_requete_sql_en_ecriture()")
+            print("EXCEPTION [sqlite3.Error] dans Bdd::executer_requete_sql_en_ecriture()")
             print("  + message =", erreur)
-            print("  + detail requete =", self.cur._last_executed)
+            #print("  + detail requete =", self.cur._last_executed)
             print("  + traceback :", traceback.print_exc() )
 
             # On fait remonter l'exception
@@ -216,14 +202,13 @@ class Bdd():
 
         #Recherche de la personne
         resultats = None
-        parametres = (nom_inscrit, prenom_inscrit, classe_inscrit, id_course)
+        parametres = (nom_inscrit, prenom_inscrit, classe_inscrit)
         requete_sql = """
-        SELECT enduro.coureurs.nom, enduro.coureurs.prenom, enduro.coureurs.classe, enduro.coureurs.id_course_fk
-        FROM enduro.coureurs
-        WHERE enduro.coureurs.nom = %s
-        AND enduro.coureurs.prenom = %s
-        AND enduro.coureurs.classe = %s
-        AND enduro.coureurs.id_course_fk = %s;"""
+        SELECT coureurs.nom, coureurs.prenom, coureurs.classe
+        FROM coureurs
+        WHERE coureurs.nom = %s
+        AND coureurs.prenom = %s
+        AND coureurs.classe = %s;"""
 
         #Éxécution de la requête
         resultats = self.executer_requete_sql_en_lecture(requete_sql, parametres)
@@ -243,10 +228,10 @@ class Bdd():
 
         #Inscription de l'élève
         resultats = None
-        parametres = (nom_inscription, prenom_inscription, classe_inscription, parrainage_inscription, id_course)
+        parametres = (nom_inscription, prenom_inscription, classe_inscription, parrainage_inscription)
         requete_sql = """
-        INSERT INTO enduro.coureurs (nom, prenom, classe, parrainage, id_course_fk)
-        VALUES (%s, %s, %s, %s, %s);"""
+        INSERT INTO coureurs (nom, prenom, classe, parrainage)
+        VALUES (%s, %s, %s, %s);"""
 
         #Éxécution de la requête
         resultats = self.executer_requete_sql_en_ecriture(requete_sql, parametres)
@@ -266,13 +251,12 @@ class Bdd():
 
         #Suppression de l'élève
         resultats = None
-        parametres = (nom_inscrit_supr, prenom_inscrit_supr, classe_inscrit_supr, id_course)
+        parametres = (nom_inscrit_supr, prenom_inscrit_supr, classe_inscrit_supr)
         requete_sql = """
-        DELETE FROM enduro.coureurs
-        WHERE enduro.coureurs.nom = %s
-        AND enduro.coureurs.prenom = %s
-        AND enduro.coureurs.classe = %s
-        AND enduro.coureurs.id_course_fk = %s;"""
+        DELETE FROM coureurs
+        WHERE coureurs.nom = %s
+        AND coureurs.prenom = %s
+        AND coureurs.classe = %;"""
 
         #Éxécution de la requête
         resultats = self.executer_requete_sql_en_ecriture(requete_sql, parametres)
@@ -297,13 +281,13 @@ class Bdd():
         resultats = None
         parametres = ()
         requete_sql = """
-            SELECT enduro.courses.id, enduro.courses.date, enduro.courses.nom, enduro.courses.active, enduro.courses.archive, COUNT(DISTINCT(enduro.coureurs.id)), COUNT(enduro.passages.id)
-            FROM enduro.courses
-            LEFT JOIN enduro.coureurs
-            ON enduro.courses.id = enduro.coureurs.id_course_fk
-            LEFT JOIN enduro.passages
-            ON enduro.coureurs.id = enduro.passages.id_coureur_fk
-            GROUP BY enduro.courses.id;"""
+            SELECT courses.id, courses.date, courses.nom, courses.active, courses.archive, COUNT(DISTINCT(coureurs.id)), COUNT(passages.id)
+            FROM courses
+            LEFT JOIN coureurs
+            ON courses.id = coureurs.id_course_fk
+            LEFT JOIN passages
+            ON coureurs.id = passages.id_coureur_fk
+            GROUP BY courses.id;"""
 
         # Exécution de la requête
         resultats = self.executer_requete_sql_en_lecture(requete_sql, parametres)
@@ -325,7 +309,7 @@ class Bdd():
         resultats = None
         parametres = ()
         requete_sql = """
-            SELECT * FROM enduro.courses
+            SELECT * FROM courses
             WHERE date >= DATE(NOW());"""
 
         # Exécution de la requête
@@ -350,14 +334,14 @@ class Bdd():
         resultats = None
         parametres = ()
         requete_sql = """
-            UPDATE enduro.courses
+            UPDATE courses
             SET active = 0;"""
         resultats = self.executer_requete_sql_en_ecriture(requete_sql, parametres)
 
         # Ajout de la course par défaut active
         parametres = (date_de_la_course, nom_de_la_course)
         requete_sql = """
-            INSERT INTO enduro.courses (date, nom, active)
+            INSERT INTO courses (date, nom, active)
             VALUES (%s, %s, 1);"""
         resultats = self.executer_requete_sql_en_ecriture(requete_sql, parametres)
 
@@ -379,7 +363,7 @@ class Bdd():
         resultats = None
         parametres = (id_course, )
         requete_sql = """
-            DELETE FROM enduro.courses
+            DELETE FROM courses
             WHERE id=%s"""
         resultats = self.executer_requete_sql_en_ecriture(requete_sql, parametres)
         print("apres =", resultats)
@@ -402,14 +386,14 @@ class Bdd():
         resultats = None
         parametres = ()
         requete_sql = """
-            UPDATE enduro.courses
+            UPDATE courses
             SET active = 0;"""
         resultats = self.executer_requete_sql_en_ecriture(requete_sql, parametres)
 
         # Mise à jour pour la course sélectionnée
         parametres = (id_course, )
         requete_sql = """
-            UPDATE enduro.courses
+            UPDATE courses
             SET active = 1
             WHERE id=%s"""
         resultats = self.executer_requete_sql_en_ecriture(requete_sql, parametres)
@@ -432,9 +416,9 @@ class Bdd():
         resultats = None
         parametres = (id_course, )
         requete_sql = """
-            SELECT COUNT(enduro.coureurs.id), SUM(enduro.coureurs.distance_totale), SUM((enduro.coureurs.distance_totale * enduro.coureurs.parrainage) + enduro.coureurs.forfait)
-            FROM enduro.coureurs
-            WHERE enduro.coureurs.id_course_fk = %s;"""
+            SELECT COUNT(coureurs.id), SUM(coureurs.distance_totale), SUM((coureurs.distance_totale * coureurs.parrainage) + coureurs.forfait)
+            FROM coureurs
+            WHERE coureurs.id_course_fk = %s;"""
         resultats = self.executer_requete_sql_en_lecture(requete_sql, parametres)
 
         # Décodage des valeurs
@@ -446,16 +430,16 @@ class Bdd():
             # Mise à jour du status archive pour la course sélectionnée
             parametres = (nb_participants, tours_effectues, argent_recolte, id_course)
             requete_sql = """
-                UPDATE enduro.courses
+                UPDATE courses
                 SET archive = 1, active = 0, nb_participants = %s, tours_effectues = %s, argent_recolte = %s
-                WHERE enduro.courses.id = %s"""
+                WHERE courses.id = %s"""
             resultats = self.executer_requete_sql_en_ecriture(requete_sql, parametres)
 
             # Suppression des coureurs et des passages associés
             parametres = (id_course, )
             requete_sql = """
-                DELETE FROM enduro.coureurs
-                WHERE enduro.coureurs.id_course_fk = %s"""
+                DELETE FROM coureurs
+                WHERE coureurs.id_course_fk = %s"""
             resultats = self.executer_requete_sql_en_ecriture(requete_sql, parametres)
 
         # Retourne le resultat
@@ -477,7 +461,7 @@ class Bdd():
         # Recherche de la course avec le statut active
         parametres = ()
         requete_sql = """
-            SELECT * FROM enduro.courses
+            SELECT * FROM courses
             WHERE active = 1;"""
         resultats = self.executer_requete_sql_en_lecture(requete_sql, parametres)
 
@@ -501,10 +485,10 @@ class Bdd():
         # Récupération des coureurs associés à la course
         parametres = (id_course, )
         requete_sql = """
-            SELECT * FROM enduro.coureurs
-            INNER JOIN enduro.courses
-            ON enduro.courses.id = enduro.coureurs.id_course_fk
-            WHERE enduro.courses.id = %s;"""
+            SELECT * FROM coureurs
+            INNER JOIN courses
+            ON courses.id = coureurs.id_course_fk
+            WHERE courses.id = %s;"""
         resultats = self.executer_requete_sql_en_lecture(requete_sql, parametres)
 
         # Retourne le resultat
@@ -572,10 +556,10 @@ class Bdd():
         resultats = None
         parametres = (id_course, )
         requete_sql = """
-            SELECT enduro.coureurs.nom, enduro.coureurs.prenom, enduro.coureurs.classe, enduro.coureurs.meilleur_temps, enduro.coureurs.distance_totale
-            FROM enduro.coureurs
-            WHERE enduro.coureurs.id_course_fk = %s
-            ORDER BY enduro.coureurs.nom ASC;"""
+            SELECT coureurs.nom, coureurs.prenom, coureurs.classe, coureurs.meilleur_temps, coureurs.distance_totale
+            FROM coureurs
+            WHERE coureurs.id_course_fk = %s
+            ORDER BY coureurs.nom ASC;"""
 
         # Exécution de la requête
         resultats = self.executer_requete_sql_en_lecture(requete_sql, parametres)
@@ -600,20 +584,20 @@ class Bdd():
         la_course = None
         parametres = (id_course, )
         requete_sql = """
-            SELECT enduro.courses.date, enduro.courses.nom
-            FROM enduro.courses
-            WHERE enduro.courses.id = %s;"""
+            SELECT courses.date, courses.nom
+            FROM courses
+            WHERE courses.id = %s;"""
         la_course = self.executer_requete_sql_en_lecture(requete_sql, parametres)
 
         # Récupération de tous les coureurs de la course
         les_coureurs = None
         parametres = (id_course, )
         requete_sql = """
-            SELECT enduro.coureurs.nom, enduro.coureurs.prenom, enduro.coureurs.classe, enduro.coureurs.meilleur_temps, enduro.coureurs.distance_totale, enduro.coureurs.parrainage, enduro.coureurs.forfait
-            FROM enduro.coureurs
-            WHERE enduro.coureurs.id_course_fk = %s
-            AND enduro.coureurs.distance_totale > 0
-            ORDER BY enduro.coureurs.nom ASC;"""
+            SELECT coureurs.nom, coureurs.prenom, coureurs.classe, coureurs.meilleur_temps, coureurs.distance_totale, coureurs.parrainage, coureurs.forfait
+            FROM coureurs
+            WHERE coureurs.id_course_fk = %s
+            AND coureurs.distance_totale > 0
+            ORDER BY coureurs.nom ASC;"""
         les_coureurs = self.executer_requete_sql_en_lecture(requete_sql, parametres)
 
 
@@ -621,9 +605,9 @@ class Bdd():
         statistiques = None
         parametres = (id_course, )
         requete_sql = """
-            SELECT SUM(enduro.coureurs.distance_totale), SUM((enduro.coureurs.parrainage * enduro.coureurs.distance_totale) + enduro.coureurs.forfait), COUNT(enduro.coureurs.id), COUNT(CASE WHEN enduro.coureurs.distance_totale > 0 THEN 1 END)
-            FROM enduro.coureurs
-            WHERE enduro.coureurs.id_course_fk = %s;"""
+            SELECT SUM(coureurs.distance_totale), SUM((coureurs.parrainage * coureurs.distance_totale) + coureurs.forfait), COUNT(coureurs.id), COUNT(CASE WHEN coureurs.distance_totale > 0 THEN 1 END)
+            FROM coureurs
+            WHERE coureurs.id_course_fk = %s;"""
         statistiques = self.executer_requete_sql_en_lecture(requete_sql, parametres)
 
 
@@ -631,12 +615,12 @@ class Bdd():
         resultats_temps = None
         parametres = (id_course, )
         requete_sql = """
-            SELECT enduro.coureurs.nom, enduro.coureurs.prenom, enduro.coureurs.classe, enduro.coureurs.meilleur_temps
-            FROM enduro.coureurs
-            WHERE enduro.coureurs.id_course_fk = %s
-            AND enduro.coureurs.meilleur_temps < 9000
-            AND enduro.coureurs.meilleur_temps > 180
-            ORDER BY enduro.coureurs.meilleur_temps ASC
+            SELECT coureurs.nom, coureurs.prenom, coureurs.classe, coureurs.meilleur_temps
+            FROM coureurs
+            WHERE coureurs.id_course_fk = %s
+            AND coureurs.meilleur_temps < 9000
+            AND coureurs.meilleur_temps > 180
+            ORDER BY coureurs.meilleur_temps ASC
             LIMIT 5;"""
         resultats_temps = self.executer_requete_sql_en_lecture(requete_sql, parametres)
 
@@ -645,10 +629,10 @@ class Bdd():
         resultats_distance = None
         parametres = (id_course, )
         requete_sql = """
-            SELECT enduro.coureurs.nom, enduro.coureurs.prenom, enduro.coureurs.classe, enduro.coureurs.distance_totale
-            FROM enduro.coureurs
-            WHERE enduro.coureurs.id_course_fk = %s
-            ORDER BY enduro.coureurs.distance_totale DESC
+            SELECT coureurs.nom, coureurs.prenom, coureurs.classe, coureurs.distance_totale
+            FROM coureurs
+            WHERE coureurs.id_course_fk = %s
+            ORDER BY coureurs.distance_totale DESC
             LIMIT 5;"""
         resultats_distance = self.executer_requete_sql_en_lecture(requete_sql, parametres)
 
@@ -656,13 +640,13 @@ class Bdd():
         resultats_temps_classe = None
         parametres = (id_course, )
         requete_sql = """
-            SELECT enduro.coureurs.classe, AVG(enduro.coureurs.meilleur_temps)
-            FROM enduro.coureurs
-            WHERE enduro.coureurs.id_course_fk = %s
-            AND enduro.coureurs.meilleur_temps < 9000
-            AND enduro.coureurs.meilleur_temps > 180
-            GROUP BY enduro.coureurs.classe
-            ORDER BY AVG(enduro.coureurs.meilleur_temps) ASC
+            SELECT coureurs.classe, AVG(coureurs.meilleur_temps)
+            FROM coureurs
+            WHERE coureurs.id_course_fk = %s
+            AND coureurs.meilleur_temps < 9000
+            AND coureurs.meilleur_temps > 180
+            GROUP BY coureurs.classe
+            ORDER BY AVG(coureurs.meilleur_temps) ASC
             LIMIT 5;"""
         resultats_temps_classe = self.executer_requete_sql_en_lecture(requete_sql, parametres)
 
@@ -670,12 +654,12 @@ class Bdd():
         resultats_distance_classe = None
         parametres = (id_course, )
         requete_sql = """
-            SELECT enduro.coureurs.classe, AVG(enduro.coureurs.distance_totale)
-            FROM enduro.coureurs
-            WHERE enduro.coureurs.id_course_fk = %s
-            AND enduro.coureurs.distance_totale > 0
-            GROUP BY enduro.coureurs.classe
-            ORDER BY AVG(enduro.coureurs.distance_totale) DESC
+            SELECT coureurs.classe, AVG(coureurs.distance_totale)
+            FROM coureurs
+            WHERE coureurs.id_course_fk = %s
+            AND coureurs.distance_totale > 0
+            GROUP BY coureurs.classe
+            ORDER BY AVG(coureurs.distance_totale) DESC
             LIMIT 5;"""
         resultats_distance_classe = self.executer_requete_sql_en_lecture(requete_sql, parametres)
 
@@ -683,15 +667,15 @@ class Bdd():
         resultats_participation_classe = None
         parametres = (id_course, )
         requete_sql = """
-            SELECT enduro.coureurs.classe,
-            (COUNT(CASE WHEN enduro.coureurs.distance_totale > 0 THEN 1 END)*100 /
-            COUNT(CASE WHEN enduro.coureurs.distance_totale >= 0 THEN 1 END) ) as taux,
-            COUNT(CASE WHEN enduro.coureurs.distance_totale > 0 THEN 1 END) as participants,
-            COUNT(enduro.coureurs.id) as inscrits
-            FROM enduro.coureurs
-            WHERE enduro.coureurs.id_course_fk = %s
-            AND enduro.coureurs.classe != "..."
-            GROUP BY enduro.coureurs.classe
+            SELECT coureurs.classe,
+            (COUNT(CASE WHEN coureurs.distance_totale > 0 THEN 1 END)*100 /
+            COUNT(CASE WHEN coureurs.distance_totale >= 0 THEN 1 END) ) as taux,
+            COUNT(CASE WHEN coureurs.distance_totale > 0 THEN 1 END) as participants,
+            COUNT(coureurs.id) as inscrits
+            FROM coureurs
+            WHERE coureurs.id_course_fk = %s
+            AND coureurs.classe != "..."
+            GROUP BY coureurs.classe
             ORDER BY taux DESC, inscrits ASC
             LIMIT 5;"""
         resultats_participation_classe = self.executer_requete_sql_en_lecture(requete_sql, parametres)
@@ -865,19 +849,19 @@ class Bdd():
         resultats = None
         parametres = (id_course, )
         requete_sql = """
-            DELETE enduro.passages
-            FROM enduro.passages
-            INNER JOIN enduro.coureurs
-            ON enduro.passages.id_coureur_fk = enduro.coureurs.id
-            WHERE enduro.coureurs.id_course_fk = %s;"""
+            DELETE passages
+            FROM passages
+            INNER JOIN coureurs
+            ON passages.id_coureur_fk = coureurs.id
+            WHERE coureurs.id_course_fk = %s;"""
         resultats = self.executer_requete_sql_en_ecriture(requete_sql, parametres)
 
         # Mise à jour des statistiques calculées des coureurs
         parametres = (id_course, )
         requete_sql = """
-            UPDATE enduro.coureurs
+            UPDATE coureurs
             SET dernier_temps = 9999, meilleur_temps = 9999, distance_totale = 0
-            WHERE enduro.coureurs.id_course_fk = %s"""
+            WHERE coureurs.id_course_fk = %s"""
         resultats = self.executer_requete_sql_en_ecriture(requete_sql, parametres)
 
         # Retourne le resultat
@@ -906,14 +890,14 @@ class Bdd():
         # Récupération des N derniers passages dans la course
         parametres = (id_course, nb_passages_max)
         requete_sql = """
-            SELECT DISTINCT(enduro.coureurs.id), enduro.coureurs.nom, enduro.coureurs.prenom, enduro.coureurs.classe, enduro.coureurs.dernier_temps, enduro.coureurs.distance_totale, MAX(enduro.passages.id), enduro.passages.date
-            FROM enduro.coureurs
-            INNER JOIN enduro.passages
-            ON enduro.coureurs.id = enduro.passages.id_coureur_fk
-            WHERE enduro.coureurs.id_course_fk = %s
-            AND enduro.passages.temps < 9000
-            GROUP BY enduro.coureurs.id, enduro.coureurs.nom, enduro.coureurs.prenom, enduro.coureurs.classe, enduro.coureurs.dernier_temps, enduro.coureurs.distance_totale, enduro.passages.date
-            ORDER BY MAX(enduro.passages.id) DESC
+            SELECT DISTINCT(coureurs.id), coureurs.nom, coureurs.prenom, coureurs.classe, coureurs.dernier_temps, coureurs.distance_totale, MAX(passages.id), passages.date
+            FROM coureurs
+            INNER JOIN passages
+            ON coureurs.id = passages.id_coureur_fk
+            WHERE coureurs.id_course_fk = %s
+            AND passages.temps < 9000
+            GROUP BY coureurs.id, coureurs.nom, coureurs.prenom, coureurs.classe, coureurs.dernier_temps, coureurs.distance_totale, passages.date
+            ORDER BY MAX(passages.id) DESC
             LIMIT %s;"""
         resultats = self.executer_requete_sql_en_lecture(requete_sql, parametres)
 
@@ -939,14 +923,14 @@ class Bdd():
         # Récupération des N derniers passages dans la course
         parametres = (id_course, nb_passages_max)
         requete_sql = """
-            SELECT enduro.passages.date, enduro.coureurs.nom, enduro.coureurs.prenom, enduro.coureurs.classe, enduro.coureurs.dernier_temps, enduro.coureurs.distance_totale, enduro.passages.numero_raspberry
-            FROM enduro.courses
-            INNER JOIN enduro.coureurs
-            ON enduro.courses.id = enduro.coureurs.id_course_fk
-            INNER JOIN enduro.passages
-            ON enduro.coureurs.id = enduro.passages.id_coureur_fk
-            WHERE enduro.courses.id = %s
-            ORDER BY enduro.passages.id DESC
+            SELECT passages.date, coureurs.nom, coureurs.prenom, coureurs.classe, coureurs.dernier_temps, coureurs.distance_totale, passages.numero_raspberry
+            FROM courses
+            INNER JOIN coureurs
+            ON courses.id = coureurs.id_course_fk
+            INNER JOIN passages
+            ON coureurs.id = passages.id_coureur_fk
+            WHERE courses.id = %s
+            ORDER BY passages.id DESC
             LIMIT %s;"""
         resultats = self.executer_requete_sql_en_lecture(requete_sql, parametres)
 
@@ -970,9 +954,9 @@ class Bdd():
         # Récupération des N derniers passages dans la course
         parametres = (id_course, )
         requete_sql = """
-            SELECT SUM(enduro.coureurs.distance_totale), SUM((enduro.coureurs.parrainage * enduro.coureurs.distance_totale) + enduro.coureurs.forfait), COUNT(enduro.coureurs.id)
-            FROM enduro.coureurs
-            WHERE enduro.coureurs.id_course_fk = %s;"""
+            SELECT SUM(coureurs.distance_totale), SUM((coureurs.parrainage * coureurs.distance_totale) + coureurs.forfait), COUNT(coureurs.id)
+            FROM coureurs
+            WHERE coureurs.id_course_fk = %s;"""
         resultats = self.executer_requete_sql_en_lecture(requete_sql, parametres)
 
         # Retourne le resultat
@@ -996,21 +980,21 @@ class Bdd():
         # Récupération du meilleur temps d'un coureur
         parametres = (id_course, )
         requete_sql = """
-            SELECT enduro.coureurs.nom, enduro.coureurs.prenom, enduro.coureurs.meilleur_temps
-            FROM enduro.coureurs
-            WHERE enduro.coureurs.id_course_fk = %s
-            AND enduro.coureurs.meilleur_temps < 9000
-            ORDER BY enduro.coureurs.meilleur_temps ASC
+            SELECT coureurs.nom, coureurs.prenom, coureurs.meilleur_temps
+            FROM coureurs
+            WHERE coureurs.id_course_fk = %s
+            AND coureurs.meilleur_temps < 9000
+            ORDER BY coureurs.meilleur_temps ASC
             LIMIT 1;"""
         resultats_temps = self.executer_requete_sql_en_lecture(requete_sql, parametres)
 
         # Récupération de la meilleure distance parcourue par un coureur
         parametres = (id_course, )
         requete_sql = """
-            SELECT enduro.coureurs.nom, enduro.coureurs.prenom, enduro.coureurs.distance_totale
-            FROM enduro.coureurs
-            WHERE enduro.coureurs.id_course_fk = %s
-            ORDER BY enduro.coureurs.distance_totale DESC
+            SELECT coureurs.nom, coureurs.prenom, coureurs.distance_totale
+            FROM coureurs
+            WHERE coureurs.id_course_fk = %s
+            ORDER BY coureurs.distance_totale DESC
             LIMIT 1;"""
         resultats_distance = self.executer_requete_sql_en_lecture(requete_sql, parametres)
 
@@ -1038,10 +1022,10 @@ class Bdd():
         # Récupération du meilleur temps d'un coureur
         parametres = (id_course, nom_coureur)
         requete_sql = """
-            SELECT enduro.coureurs.nom, enduro.coureurs.prenom, enduro.coureurs.classe, enduro.coureurs.meilleur_temps, enduro.coureurs.distance_totale, ((enduro.coureurs.distance_totale * enduro.coureurs.parrainage) + enduro.coureurs.forfait)
-            FROM enduro.coureurs
-            WHERE enduro.coureurs.id_course_fk = %s
-            AND enduro.coureurs.nom LIKE UPPER(%s);"""
+            SELECT coureurs.nom, coureurs.prenom, coureurs.classe, coureurs.meilleur_temps, coureurs.distance_totale, ((coureurs.distance_totale * coureurs.parrainage) + coureurs.forfait)
+            FROM coureurs
+            WHERE coureurs.id_course_fk = %s
+            AND coureurs.nom LIKE UPPER(%s);"""
         resultats_du_coureur = self.executer_requete_sql_en_lecture(requete_sql, parametres)
 
         # Retourne le resultat
@@ -1170,12 +1154,12 @@ class Bdd():
         # Recherche si il existe un coureur avec ce code-barre ?
         parametres = (id_course, code_barre)
         requete_sql = """
-            SELECT enduro.coureurs.id, enduro.coureurs.nom, enduro.coureurs.prenom
-            FROM enduro.coureurs
-            INNER JOIN enduro.courses
-            ON enduro.courses.id = enduro.coureurs.id_course_fk
-            WHERE enduro.courses.id = %s
-            AND enduro.coureurs.code_barre = %s;"""
+            SELECT coureurs.id, coureurs.nom, coureurs.prenom
+            FROM coureurs
+            INNER JOIN courses
+            ON courses.id = coureurs.id_course_fk
+            WHERE courses.id = %s
+            AND coureurs.code_barre = %s;"""
         resultats = self.executer_requete_sql_en_lecture(requete_sql, parametres)
 
 
@@ -1190,7 +1174,7 @@ class Bdd():
             # Ajout d'un coureur inconnu dans la bdd
             parametres = ("INCO", "NNU", "...", code_barre, id_course)
             requete_sql = """
-                INSERT INTO enduro.coureurs (nom, prenom, classe, code_barre, id_course_fk)
+                INSERT INTO coureurs (nom, prenom, classe, code_barre, id_course_fk)
                 VALUES (%s, %s, %s, %s, %s);"""
             id_coureur = self.executer_requete_sql_en_ecriture(requete_sql, parametres)
             nouveau_coureur = True
@@ -1224,10 +1208,10 @@ class Bdd():
         # Recherche si il existe déjà un passage
         parametres = (id_coureur, )
         requete_sql = """
-            SELECT enduro.passages.id, enduro.passages.date
-            FROM enduro.passages
-            WHERE enduro.passages.id_coureur_fk = %s
-            ORDER BY enduro.passages.id DESC
+            SELECT passages.id, passages.date
+            FROM passages
+            WHERE passages.id_coureur_fk = %s
+            ORDER BY passages.id DESC
             LIMIT 1;"""
         resultats = self.executer_requete_sql_en_lecture(requete_sql, parametres)
         if self.debug == True:
@@ -1254,7 +1238,7 @@ class Bdd():
         if duree_tour_en_s > delai_de_garde:
             parametres = (nouvelle_date.strftime("%Y-%m-%d %H:%M:%S"), numero_raspberry, duree_tour_en_s, id_coureur)
             requete_sql = """
-                INSERT INTO enduro.passages (date, numero_raspberry, temps, id_coureur_fk)
+                INSERT INTO passages (date, numero_raspberry, temps, id_coureur_fk)
                 VALUES (%s, %s, %s, %s);"""
             id_passage = self.executer_requete_sql_en_ecriture(requete_sql, parametres)
             if self.debug == True:
@@ -1288,9 +1272,9 @@ class Bdd():
         # Récupération du meilleur temps et de la distance parcourue pour ce coureur
         parametres = (id_coureur, )
         requete_sql = """
-            SELECT MIN(enduro.passages.temps), COUNT(enduro.passages.id)
-            FROM enduro.passages
-            WHERE enduro.passages.id_coureur_fk = %s;"""
+            SELECT MIN(passages.temps), COUNT(passages.id)
+            FROM passages
+            WHERE passages.id_coureur_fk = %s;"""
         resultats = self.executer_requete_sql_en_lecture(requete_sql, parametres)
         if self.debug == True:
             print("  + resultats =>", resultats)
@@ -1307,9 +1291,9 @@ class Bdd():
 
             parametres = (temps_dernier_tour, meilleur_temps, distance_totale, id_coureur)
             requete_sql = """
-                UPDATE enduro.coureurs
+                UPDATE coureurs
                 SET dernier_temps = %s, meilleur_temps = %s, distance_totale = %s
-                WHERE enduro.coureurs.id = %s;"""
+                WHERE coureurs.id = %s;"""
             id_coureur = self.executer_requete_sql_en_ecriture(requete_sql, parametres)
 
 
@@ -1340,13 +1324,13 @@ class Bdd():
         # Récupération du meilleur temps et de la distance parcourue pour ce coureur
         parametres = (id_coureur, id_coureur)
         requete_sql = """
-            SELECT enduro.coureurs.nom, enduro.coureurs.prenom, enduro.coureurs.classe, COUNT(enduro.passages.id), MIN(enduro.passages.temps), ROUND(AVG(enduro.passages.temps)), enduro.coureurs.parrainage, enduro.coureurs.forfait
-            FROM enduro.coureurs
-            INNER JOIN enduro.passages
-            ON enduro.coureurs.id = enduro.passages.id_coureur_fk
-            WHERE enduro.coureurs.id = %s
-            AND enduro.passages.id_coureur_fk = %s
-            AND enduro.passages.temps < 9000;"""
+            SELECT coureurs.nom, coureurs.prenom, coureurs.classe, COUNT(passages.id), MIN(passages.temps), ROUND(AVG(passages.temps)), coureurs.parrainage, coureurs.forfait
+            FROM coureurs
+            INNER JOIN passages
+            ON coureurs.id = passages.id_coureur_fk
+            WHERE coureurs.id = %s
+            AND passages.id_coureur_fk = %s
+            AND passages.temps < 9000;"""
         resultats = self.executer_requete_sql_en_lecture(requete_sql, parametres)
         if self.debug == True:
             print("  + resultats =>", resultats)
@@ -1398,9 +1382,9 @@ if __name__ == "__main__":
     #
     try:
         # Récupération de toutes les courses
-        for i in range(0, 100):
-            print("Bdd::recuperer_courses_toutes()")
-            print(bdd.recuperer_courses_toutes())
+        #for i in range(0, 100):
+        print("Bdd::recuperer_courses_toutes()")
+        print(bdd.recuperer_courses_toutes())
 
         # Récupération des courses
         #print("Bdd::recuperer_courses_recentes()")
