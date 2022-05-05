@@ -8,6 +8,47 @@
 
 {% block body %}    <!-- Début du block body -->
 
+<!-- Bandeau pour erreurs et notifications -->
+<div class="row">
+  <div class="col-lg-12">
+    <div id="admin_erreur">
+      {% for category, message in get_flashed_messages(with_categories=true) %}
+      <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+      {% endfor %}
+    </div>
+  </div>
+</div><!-- row -->
 
+
+<div class="row">
+	<div class="col-lg-12">
+		<div id="admin_donnees">
+			<h1 class="text_center">[ Inscription ]</h1>
+			<div class="jumbotron">
+				<br>
+    		<p class="text_center">Vous pouvez modifier le montant de votre parrainage</p>
+    		<br>
+    	</div>
+  	</div>
+  	<div class="col-lg- text_center">
+		<form action="{{ url_for('inscription_modification') }}" method="post" class="form-example">
+			<p class="text_center"><strong>Renseignement</strong></p>
+			<div class="form-example">
+				<input type="text" name="nom_modification" placeholder="Nom" size="20">
+				<input type="text" name="prenom_modification" placeholder="Prenom" size="20">
+				<input type="text" name="classe_modification" placeholder="classe" size="20">
+			</div>
+			<br>
+			<p class="text_center"><strong>Changement</strong></p>
+			<div class="form-example">
+				<input type="text" name="parrainage_modification" placeholder=" parrainage €/tour" size="20">
+			</div>
+			<br>
+			<div class="text-center">
+				<button type="submit" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> Modifier </button>
+			</div>
+		</form>
+	</div>
+</div>
 
 {% endblock %}  <!-- Fin du block body -->

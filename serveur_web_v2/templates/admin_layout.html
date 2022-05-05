@@ -53,7 +53,6 @@
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                 <a class="dropdown-item" href="{{ url_for('administrer_courses') }}">Afficher/ajouter/supprimer</a>
                 <a class="dropdown-item" href="#">Exporter résultats en HTML</a>
-
               </div>
             </div>
           </li>
@@ -68,19 +67,12 @@
             </div>
           </li>
 
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('administrer_logiciels_lister') }}">
-              <button type="button" class="btn btn-secondary">Logiciels</button>
-            </a>
-          </li>
-
         {% endif %}
 
         <!-- Formulaire d'authentification -->
         {% if not session.authentifie %}
         <div class="text-center">
-          <a href="#mymodal" class="trigger-btn" data-toggle="modal"><img src="{{ url_for('static', filename='images/login.png') }}"></img></a>
-          <p><h6 class="text_center text_deco">Veuillez vous connectez</h6></p>
+          <a href="#mymodal" class="trigger-btn" data-toggle="modal"><img src="{{ url_for('static', filename='images/login.png') }}"></img><p><h6 class="text_center text_deco">Veuillez vous connectez</h6></p></a>
         </div>
         <div id="mymodal" class="modal fade">
           <div class="modal-dialog modal-login">

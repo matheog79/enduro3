@@ -8,62 +8,108 @@
 
 {% block body %}    <!-- Début du block body -->
 
-
 <!-- Bandeau pour erreurs et notifications -->
 <div class="row">
-    <div class="col-lg-12">
-        <div id="admin_erreur">
-            {% for category, message in get_flashed_messages(with_categories=true) %}
-            <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
-            {% endfor %}
-        </div>
+  <div class="col-lg-12">
+    <div id="admin_erreur">
+      {% for category, message in get_flashed_messages(with_categories=true) %}
+      <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+      {% endfor %}
     </div>
+  </div>
 </div><!-- row -->
+
 
 <!-- Titre de la page -->
 <div class="row">
-  <h1>Etape #4 :: Importation des coureurs</h1>
+  <h1>Etape #4 :: conf/test lecteurs code-barre + serveur MQTT</h1>
 </div>
 
 
-<!-- Fomulaire pour le téléversement et l'importation du fichier CSV -->
-<form action="{{ url_for('administrer_coureurs_importer') }}" method="post" enctype="multipart/form-data">
-  <fieldset>
+<!-- Configuration des Raspberry PI -->
+<div class="row">
+  <p class="card-text font-italic">Re-lancer le serveur MQTT (sur le pc portable serveur central)</p>
+</div>
+<div class="row">
+  <pre><code>$ cd /home/etudiant/enduro/serveur_central
+$ ./serveur_mqtt.py</code></pre>
+</div>
 
-    <!-- Zone pour vérifier l'id de la course active -->
-    <div class="row">
-      <h3>Course active</h3>
-    </div>
-    <div class="form-group">
-      <div class="row">
-        <p class="font-italic">La course dans laquelle seront inscrits les coureurs. Ce choix a été effectué à l'étape précédente</p>
-        <table class="table table-striped">
-          <thead><tr><th>ID de la course active</th></tr></thead>
-          <tbody>
-            {% if session.id_course_active %}
-            <tr><td><h2><span class="badge badge-success"> {{ session.id_course_active }} </span></h2></td></tr>
-            {% else %}
-            <tr><td><h2><span class="badge badge-danger"> ??? </span></h2></td></tr>
-            {% endif %}
-          </tbody>
-        </table>
-      </div><!-- row -->
-    </div><!-- form-group -->
+<div class="row">
+  <h3>Câblage matériel + lancement logiciels (sur les Raspberry PI x 3)</h2>
+</div>
+<div class="row">
+  <p class="card-text font-italic">Pour configurer les 3 logiciels à lancer, éditer le fichier de configuration et vérifier/modifier les 3 paramètres :
+    <ul>
+      <li>NUMERO_RAPSBERRY_PI = 1 ou 2 ou 3</li>
+      <li>NOM_FICHIER_CSV = "enduro_2018_RPI01.csv" ou "enduro_2018_RPI02.csv" ou "enduro_2018_RPI03.csv"</li>
+      <li>IP_SERVEUR_CENTRAL = 192.168.50.104 ou ...</li>
+    </ul>
+  </p>
+</div>
+<div class="row">
+  <pre><code>$ nano /home/pi/enduro/client_lecteur/config.py</code></pre>
+</div>
+<div class="row">
+  <p class="card-text font-italic">Pour lancer le logiciel associé au lecteur code-barre 1, ouvrir un terminal console et entrer les commandes suivantes :</p>
+</div>
+<div class="row">
+  <pre><code>$ cd /home/pi/enduro/client_lecteur
+$ ./lecteur_codebarre.py 1</code></pre>
+</div>
+<div class="row">
+  <p class="card-text font-italic">Pour lancer le logiciel associé au lecteur code-barre 2, ouvrir un terminal console et entrer les commandes suivantes :</p>
+</div>
+<div class="row">
+  <pre><code>$ cd /home/pi/enduro/client_lecteur
+$ ./lecteur_codebarre.py 2</code></pre>
+</div>
+<div class="row">
+  <p class="card-text font-italic">Pour lancer le logiciel IHM, ouvrir un terminal console et entrer les commandes suivantes :</p>
+</div>
+<div class="row">
+  <pre><code>$ cd /home/pi/enduro/client_lecteur
+$ ./lecteur_ihm_simple.py</code></pre>
+</div>
+<br />
 
 
-    <!-- Zone pour choisir et téléverser le fichier CSV -->
-    <div class="row">
-      <h3>Activation des inscriptions</h3>
-    </div>
-    <form method="post">
-      <div class="row">
-        <div class="col">
-          <input type="checkbox" name="inscriptions_ouvert">
-          <label for="inscriptions_ouvert">Ouvrir les inscriptions ( Si la checkBox est appuyé, alors les isncriptiond sont ouvertes )</label>
-        </div><!-- col -->
-      </div><!-- row -->
-    </form>
-    <br />
+<!-- Derniers passage de badge via lecteur code-barre associés au Rasbperry PI -->
+<div class="row">
+  <h3>Tests</h3>
+</div>
+<div class="row">
+  <p class="card-text font-italic">Derniers passages enregistrés dans la base de données. Le bouton ci-dessous permet d'effacer tous les passages enregistrés
+  dans la base de données et réinitialiser les statistiques des coureurs. A utiliser avec précaution car potentiellement il peut tout perdre d'une course.</p>
+</div>
+<div class="row">
+  <a href="{{ url_for('administrer_courses_reinitialiser', id_course=session.id_course_active) }}">
+    <button class="btn btn-danger btn-sm">
+      <i class="fas fa-skull-crossbones"></i> Supprimer tous les passages
+      <span class="badge badge-light">id={{ session.id_course_active }}</span>
+    </button>
+  </a>
+</div><!-- row -->
+<br />
+
+
+<div class="row">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Numéro R.PI</th>
+        <th>Nom</th>
+        <th>Prénom</th>
+        <th>Classe</th>
+        <th>Temps</th>
+        <th>Nb tours</th>
+      </tr></thead>
+    <tbody id="derniers_passages">
+    </tbody>
+  </table>
+</div><!-- row -->
+<br />
 
 
 <!-- Les boutons étapes suivante et précédente -->
@@ -73,12 +119,15 @@
       <button class="btn btn-primary btn-sm"><i class="fas fa-step-backward"></i> Etape #3</button>
     </a>
   </div><!-- col -->
-  <div class="col-sm text text_right">
+  <div class="col-sm text_right">
     <a href="{{ url_for('administrer_tutoriel_etape5') }}">
       <button class="btn btn-primary btn-sm"><i class="fas fa-step-forward"></i> Etape #5</button>
     </a>
   </div><!-- col -->
 </div><!-- row -->
+
+
+
 
 
 

@@ -3,6 +3,7 @@
 
 
 {% block javascript %}    <!-- Début du block javascript -->
+<script src="{{ url_for('static', filename='js/qrcode/qrcode.min.js') }}" type="text/javascript"></script>
 {% endblock %}  <!-- Fin du block javascript -->
 
 
@@ -22,27 +23,36 @@
 
 <!-- Titre -->
 <div class="row">
-  <h1>Etape #6 :: Suivi en direct de la course</h1>
+  <h1>Etape #7 :: Partage des résultats</h1>
 </div><!-- row -->
 
 
-<!-- Lien vers le suivi en direct live de la course -->
+<!-- QR code de partage -->
 <div class="row">
-  <h3>Live</h3>
-</div><!-- row -->
+  <h3>QR code</h3>
+</div>
 <div class="row">
-  <p class="card-text font-italic">En cliquant sur le bouton ci-dessous, vous allez ouvrir un nouvel onglet dans le navigateur qui vous dirigera vers la page publique de suivi en direct de la course. Une fois la course terminée.</p>
-  <a href="{{ url_for('afficher_direct') }}" target="_blank" rel="noopener noreferrer">
-    <button class="btn btn-primary btn-sm"><i class="fas fa-heartbeat"></i> Etape #6 => Suivre la course en direct</button>
-  </a>
+  <p class="card-text font-italic">Scanner le QR code ci-dessous pour accéder aux résultats de la course...</p>
+</div><br />
+<div class="row">
+  <div id="qrcode"></div>
+  <script type="text/javascript">
+    //new QRCode(document.getElementById("qrcode"), "{{ url_for('afficher_resultats') }}");
+    var qrcode = new QRCode(document.getElementById("qrcode"), {
+      text: "{{ url_for('afficher_resultats', _external=True) }}",
+      width: 500,
+      height: 500,
+      colorDark : "#000000",
+      colorLight : "#ffffff",
+      correctLevel : QRCode.CorrectLevel.H
+  });
+  </script>
+</div><br />
+<div class="row">
+  <p class="card-text font-italic">... ou sinon via l'URL suivante :&nbsp;</p>
+    <a href="{{ url_for('afficher_resultats', _external=True) }}">{{ url_for('afficher_resultats', _external=True) }}</a>
 </div>
 <br />
-<div class="row">
-  <p class="card-text font-italic">Une fois la course terminée, il faudra fermer cet onglet et revenir sur cette page pour poursuivre les étapes d'administration de la course.</p>
-</div>
-<br />
-
-
 
 
 <!-- Les boutons étapes suivante et précédente -->
@@ -53,9 +63,6 @@
     </a>
   </div><!-- col -->
   <div class="col-sm">
-    <a href="{{ url_for('administrer_tutoriel_etape7') }}">
-      <button class="btn btn-primary btn-sm"><i class="fas fa-step-forward"></i> Etape #7</button>
-    </a>
   </div><!-- col -->
 </div><!-- row -->
 

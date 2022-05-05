@@ -20,34 +20,83 @@
     </div>
 </div><!-- row -->
 
-<!-- Titre -->
+<!-- Contenu de la page -->
 <div class="row">
-  <h1>Etape #2 :: Les logiciels</h1>
+  <h1>Etape #2 :: La course</h1>
 </div><!-- row -->
 
-<!-- Tableau des logiciels -->
 <div class="row">
-  <h3>Etat des logiciels</h3>
+  <h3>Ajout d'une nouvelle course</h3>
 </div><!-- row -->
 <div class="row">
-  <p class="card-text font-italic">Ces logiciels sont nécessaires au bon fonctionnement de la gestion de la course</p>
+  <p class="font-italic">Cliquer dans la zone date pour afficher le calendrier et choisir la bonne date. Cette date doit nécessairement être dans le futur, voire le jour même.
+  Entrer également un nom pour la course.</p>
+</div>
+
+<div class="row">
+  <form action="{{ url_for('administrer_courses_ajouter') }}" method="post">
+    <div class="form-row">
+      <div class="col">
+        <input class="form-control" type="date" name="date_de_la_course">
+      </div>
+      <div class="col">
+        <input class="form-control" type="text" name="nom_de_la_course" placeholder="...nom de la course...">
+      </div>
+      <div class="col">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter une nouvelle course</button>
+      </div>
+    </form>
+  </div><!-- row -->
+</div>
+<br /><br />
+
+<div class="row">
+  <h3>Liste des courses</h3>
+</div><!-- row -->
+<div class="row">
+  <p class="font-italic">Liste des courses dans la base de données.
+    A noter qu'il n'est possible de supprimer que les courses qui ne sont pas archivées.
+    La suppression d'une course, supprime automatiquement ses coureurs et les passages des coureurs.    
+  </p>
   <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>Nom du logiciel</th>
-        <th>Etat</th>
-      </tr></thead>
+    <thead><tr><th>ID</th><th>Date</th><th>Nom</th><th>Active</th><th>Archive</th><th>Coureurs</th><th>Passages</th><th>Actions</th></tr></thead>
     <tbody>
-    {% for clef,valeur in logiciels.items() %}
-      <tr>
-        <td>{{ clef }}</td>
-        {% if valeur == 1 %}
-        <td><i class="fas fa-check-circle" style="color:green"></i></td>
-        {% else %}
-        <td><i class="fas fa-exclamation-triangle" style="color:red"></i></td>
-        {% endif %}
-      </tr>
-    {% endfor %}
+    {% if les_courses %}
+      {% for une_course in les_courses %}
+        <tr>
+          <td>{{ une_course[0] }}</td><!-- id -->
+          <td>{{ une_course[1] }}</td><!-- date -->
+          <td>{{ une_course[2] }}</td><!-- nom -->
+          {% if une_course[3] == 0 %}
+            <td><i class="far fa-square"></i></td><!-- active -->
+          {% else %}
+            <td><i class="far fa-check-square"></i></td><!-- active -->
+          {% endif %}
+          {% if une_course[4] == 0 %}
+            <td><i class="fas fa-lock-open"></i></td><!-- archive -->
+          {% else %}
+            <td><i class="fas fa-lock"></i></td><!-- archive -->
+          {% endif %}
+          <td>{{ une_course[5] }}</td><!-- nb coureurs -->
+          <td>{{ une_course[6] }}</td><!-- nb passages -->
+          <td>
+          {% if une_course[4] == 1 %}
+            <button class="btn btn-danger btn-sm" disabled><i class="fas fa-trash-alt"></i> Supprimer</button>
+            <button class="btn btn-success btn-sm" disabled><i class="fas fa-check"></i> Choisir</button>
+          {% else %}
+            <a href="{{ url_for('administrer_courses_supprimer', id_course=une_course[0]) }}">
+              <button class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i> Supprimer</button>
+            </a>
+            <a href="{{ url_for('administrer_courses_choisir', id_course=une_course[0]) }}">
+              <button class="btn btn-success btn-sm"><i class="fas fa-check"></i> Choisir</button>
+            </a>
+          {% endif %}
+
+
+          </td>
+        </tr>
+      {% endfor %}
+    {% endif %}
     </tbody>
   </table>
 </div><!-- row -->
@@ -55,36 +104,26 @@
 
 
 <div class="row">
-  <h3>Procédure pour le (re)lancement</h3>
-</div><!-- row -->
+  <h3>Choix de la course active</h3>
+</div>
 <div class="row">
-  <p class="card-text font-italic">Pour lancer (ou relancer) <strong>apache2</strong></p>
-</div><!-- row -->
+  <p class="font-italic">Parmi les courses dans le tableau ci-dessus, il faut cliquer sur le bouton <button class="btn btn-success btn-sm"><i class="fas fa-check"></i> Choisir</button>
+  pour sélectionner celle qui sera la course active dans le logiciel</p>
+</div>
 <div class="row">
-  <pre><code>$ sudo systemctl restart apache2</code></pre>
+  <table class="table table-striped">
+    <thead><tr><th>ID de la course active</th></tr></thead>
+    <tbody>
+      {% if session.id_course_active %}
+      <tr><td><h2><span class="badge badge-success text_deco"> {{ session.id_course_active }} </span></h2></td></tr>
+      {% else %}
+      <tr><td><h2><span class="badge badge-danger text_deco"> ??? </span></h2></td></tr>
+      {% endif %}
+    </tbody>
+  </table>
 </div><!-- row -->
 
-<div class="row">
-  <p class="card-text font-italic">Pour lancer (ou relancer) <strong>sqlite3</strong></p>
-</div><!-- row -->
-<div class="row">
-  <pre><code>$ sudo systemctl restart sqlite3</code></pre>
-</div><!-- row -->
 
-<div class="row">
-  <p class="card-text font-italic">Pour lancer (ou relancer) <strong>mosquitto</strong></p>
-</div><!-- row -->
-<div class="row">
-  <pre><code>$ sudo systemctl restart mosquitto</code></pre>
-</div><!-- row -->
-
-<div class="row">
-  <p class="card-text font-italic">Pour lancer <strong>serveur_mqtt.py</strong></p>
-</div><!-- row -->
-<div class="row">
-  <pre><code>$ cd /home/etudiant/enduro/client_lecteur
-$ ./serveur_mqtt.py</code></pre>
-</div><!-- row -->
 <br />
 
 

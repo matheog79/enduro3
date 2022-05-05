@@ -20,111 +20,80 @@
     </div>
 </div><!-- row -->
 
-<!-- Contenu de la page -->
+<!-- Titre de la page -->
 <div class="row">
-  <h1>Etape #3 :: La course</h1>
-</div><!-- row -->
-
-<div class="row">
-  <h3>Ajout d'une nouvelle course</h3>
-</div><!-- row -->
-<div class="row">
-  <p class="font-italic">Cliquer dans la zone date pour afficher le calendrier et choisir la bonne date. Cette date doit nécessairement être dans le futur, voire le jour même.
-  Entrer également un nom pour la course.</p>
+  <h1>Etape #3 :: Importation des badges</h1>
 </div>
 
-<div class="row">
-  <form action="{{ url_for('administrer_courses_ajouter') }}" method="post">
-    <div class="form-row">
-      <div class="col">
-        <input class="form-control" type="date" name="date_de_la_course">
-      </div>
-      <div class="col">
-        <input class="form-control" type="text" name="nom_de_la_course" placeholder="...nom de la course...">
-      </div>
-      <div class="col">
-        <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter une nouvelle course</button>
-      </div>
-    </form>
-  </div><!-- row -->
-</div>
+
+<!-- Fomulaire pour le téléversement et l'importation du fichier CSV -->
+<form action="{{ url_for('administrer_coureurs_importer') }}" method="post" enctype="multipart/form-data">
+  <fieldset>
+
+    <!-- Zone pour vérifier l'id de la course active -->
+    <div class="row">
+      <h3>Course active</h3>
+    </div>
+    <div class="form-group">
+      <div class="row">
+        <p class="font-italic">La course dans laquelle seront importés les coureurs. Ce choix a été effectué à l'étape précédente</p>
+        <table class="table table-striped">
+          <thead><tr><th>ID de la course active</th></tr></thead>
+          <tbody>
+            {% if session.id_course_active %}
+            <tr><td><h2><span class="badge badge-success text_deco"> {{ session.id_course_active }} </span></h2></td></tr>
+            {% else %}
+            <tr><td><h2><span class="badge badge-danger text_deco"> ??? </span></h2></td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div><!-- row -->
+    </div><!-- form-group -->  
+
+
+    <!-- Zone pour choisir et téléverser le fichier CSV -->
+    <div class="row">
+      <h3>Choix et format du fichier CSV</h3>
+    </div>
+    <div class="form-group">
+      <div class="row">
+        <div class="col">
+          <p class="font-italic">Le fichier CSV doit avoir les caractéristiques suivantes :
+            <ul class="font-italic">
+              <li>4 colonnes (nom, prenom, classe, code-barre)</li>
+              <li>caractère séparateur = ;</li>
+              <li>attention encodage UTF-8 obligatoire</li>
+              <li>attention aux éventuels accents (Ï, Ë, Â...)</li>
+              <li>pas de première ligne avec les en-têtes des colonnes</li>
+            </ul>
+          </p>
+        </div><!-- col -->
+        <div class="col">
+          <p class="font-italic">Exemple :
+        <pre><code>
+  CHOPOTEAU;LEO;AM1;1234567
+  TITTEGOUTTE;JUSTINE;SNIR2;9876543
+  SHOWKANAPE;OPHELIE;PERSONNEL;4352617
+        </code></pre>
+          </p>
+        </div><!-- col -->
+      </div><!-- row -->
+      <input type="file" class="form-control-file" name="fichier_csv" id="exampleFormControlFile1">
+    </div><!-- form-group -->
+    <br />
+
+
+    <!-- Zone pour téléverser le fichier CSV et importer les données dans la bdd-->
+    <div class="row">
+      <h3>Téléversement et importation du fichier CSV</h3>
+    </div>
+    <p class="font-italic">Une fois toutes les vérifications effectuées, vous pouvez cliquer sur le bouton ci-dessous.<br />
+    Soyez patient, selon la taille du fichier CSV, le processus peut durer plusieurs secondes, voire plusieurs minutes
+    </p>
+    <button type="submit" class="btn btn-primary"><i class="fas fa-cloud-upload-alt"></i> Télécharger et enregistrer</button>
+  </fieldset>
+</form>
 <br /><br />
-
-<div class="row">
-  <h3>Liste des courses</h3>
-</div><!-- row -->
-<div class="row">
-  <p class="font-italic">Liste des courses dans la base de données.
-    A noter qu'il n'est possible de supprimer que les courses qui ne sont pas archivées.
-    La suppression d'une course, supprime automatiquement ses coureurs et les passages des coureurs.    
-  </p>
-  <table class="table table-striped">
-    <thead><tr><th>ID</th><th>Date</th><th>Nom</th><th>Active</th><th>Archive</th><th>Coureurs</th><th>Passages</th><th>Actions</th></tr></thead>
-    <tbody>
-    {% if les_courses %}
-      {% for une_course in les_courses %}
-        <tr>
-          <td>{{ une_course[0] }}</td><!-- id -->
-          <td>{{ une_course[1] }}</td><!-- date -->
-          <td>{{ une_course[2] }}</td><!-- nom -->
-          {% if une_course[3] == 0 %}
-            <td><i class="far fa-square"></i></td><!-- active -->
-          {% else %}
-            <td><i class="far fa-check-square"></i></td><!-- active -->
-          {% endif %}
-          {% if une_course[4] == 0 %}
-            <td><i class="fas fa-lock-open"></i></td><!-- archive -->
-          {% else %}
-            <td><i class="fas fa-lock"></i></td><!-- archive -->
-          {% endif %}
-          <td>{{ une_course[5] }}</td><!-- nb coureurs -->
-          <td>{{ une_course[6] }}</td><!-- nb passages -->
-          <td>
-          {% if une_course[4] == 1 %}
-            <button class="btn btn-danger btn-sm" disabled><i class="fas fa-trash-alt"></i> Supprimer</button>
-            <button class="btn btn-success btn-sm" disabled><i class="fas fa-check"></i> Choisir</button>
-          {% else %}
-            <a href="{{ url_for('administrer_courses_supprimer', id_course=une_course[0]) }}">
-              <button class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i> Supprimer</button>
-            </a>
-            <a href="{{ url_for('administrer_courses_choisir', id_course=une_course[0]) }}">
-              <button class="btn btn-success btn-sm"><i class="fas fa-check"></i> Choisir</button>
-            </a>
-          {% endif %}
-
-
-          </td>
-        </tr>
-      {% endfor %}
-    {% endif %}
-    </tbody>
-  </table>
-</div><!-- row -->
-<br />
-
-
-<div class="row">
-  <h3>Choix de la course active</h3>
-</div>
-<div class="row">
-  <p class="font-italic">Parmi les courses dans le tableau ci-dessus, il faut cliquer sur le bouton <button class="btn btn-success btn-sm"><i class="fas fa-check"></i> Choisir</button>
-  pour sélectionner celle qui sera la course active dans le logiciel</p>
-</div>
-<div class="row">
-  <table class="table table-striped">
-    <thead><tr><th>ID de la course active</th></tr></thead>
-    <tbody>
-      {% if session.id_course_active %}
-      <tr><td><h2><span class="badge badge-success"> {{ session.id_course_active }} </span></h2></td></tr>
-      {% else %}
-      <tr><td><h2><span class="badge badge-danger"> ??? </span></h2></td></tr>
-      {% endif %}
-    </tbody>
-  </table>
-</div><!-- row -->
-
-
-<br />
 
 
 <!-- Les boutons étapes suivante et précédente -->
@@ -140,7 +109,6 @@
     </a>
   </div><!-- col -->
 </div><!-- row -->
-
 
 
 

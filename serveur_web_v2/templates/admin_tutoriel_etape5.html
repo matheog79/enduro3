@@ -3,154 +3,102 @@
 
 
 {% block javascript %}    <!-- Début du block javascript -->
-<script>
-
-
-/**
- * Fonction pour gérer récupérer et afficher le tableau des derniers passages
- */
-function recuperer_derniers_passages() {
-
-  $.ajax({
-    url: "{{ url_for('recuperer_derniers_passages_course_test') }}",
-  })
-    .done(function( data ) {
-      console.log(data);
-      $("#derniers_passages").html("");
-      $.each(data, function(index, element) {
-        $("#derniers_passages").append(
-          "<tr>" +
-            "<td>" + element.date + "</td>" +  // on isole l'heure de la date
-            "<td>" + element.numero_raspberry + "</td>" +
-            "<td>" + element.nom + "</td>" +
-            "<td>" + element.prenom + "</td>" +
-            "<td>" + element.classe + "</td>" +
-            "<td>" + element.temps + "</td>" +
-            "<td>" + element.distance + "</td>" +
-          "</tr>");
-      });
-    });
-}
-
-
-/**
- * Fonction pour gérer la mise à jour de la page
- */
-function mettre_a_jour() {
-  recuperer_derniers_passages();
-  setTimeout(mettre_a_jour, 1000);
-}
-
-
-// Auchargement de la page on lance la mise à jour des champs automatiquement
-$( document ).ready(function() {
-  mettre_a_jour()
-});
-
-</script>
 {% endblock %}  <!-- Fin du block javascript -->
 
 
 {% block body %}    <!-- Début du block body -->
 
+
 <!-- Bandeau pour erreurs et notifications -->
 <div class="row">
-  <div class="col-lg-12">
-    <div id="admin_erreur">
-      {% for category, message in get_flashed_messages(with_categories=true) %}
-      <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
-      {% endfor %}
+    <div class="col-lg-12">
+        <div id="admin_erreur">
+            {% for category, message in get_flashed_messages(with_categories=true) %}
+            <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+            {% endfor %}
+        </div>
     </div>
-  </div>
+</div><!-- row -->
+
+<!-- Contenu de la page -->
+<div class="row">
+  <h1>Etape #5 :: Exportation PDF</h1>
 </div><!-- row -->
 
 
-<!-- Titre de la page -->
+<!-- Liste des courses -->
 <div class="row">
-  <h1>Etape #5 :: conf/test lecteurs code-barre + serveur MQTT</h1>
-</div>
-
-
-<!-- Configuration des Raspberry PI -->
-<div class="row">
-  <p class="card-text font-italic">Re-lancer le serveur MQTT (sur le pc portable serveur central)</p>
+  <h3>Procédure</h3>
 </div>
 <div class="row">
-  <pre><code>$ cd /home/etudiant/enduro/serveur_central
-$ ./serveur_mqtt.py</code></pre>
-</div>
-
-<div class="row">
-  <h3>Câblage matériel + lancement logiciels (sur les Raspberry PI x 3)</h2>
-</div>
-<div class="row">
-  <p class="card-text font-italic">Pour configurer les 3 logiciels à lancer, éditer le fichier de configuration et vérifier/modifier les 3 paramètres :
-    <ul>
-      <li>NUMERO_RAPSBERRY_PI = 1 ou 2 ou 3</li>
-      <li>NOM_FICHIER_CSV = "enduro_2018_RPI01.csv" ou "enduro_2018_RPI02.csv" ou "enduro_2018_RPI03.csv"</li>
-      <li>IP_SERVEUR_CENTRAL = 192.168.50.104 ou ...</li>
-    </ul>
+  <p class="font-italic">Afin de pouvoir partager les résultats de la course, il faut procéder en 3 temps :
+    <ol>
+      <li>
+        <strong>Exporter</strong> les résultats de la course en cliquant sur le bouton <button class="btn btn-success btn-sm" disabled><i class="fas fa-file-export"></i> Exporter</button>.
+         Le public pourra ensuite télécharger et consulter le fichier PDF exporté
+       </li>
+      <li>
+        <strong>Vérifier</strong> que l'exportation s'est bien déroulée et que le fichier
+        <a href="{{ url_for('telecharger_fichier_pdf', filename='resultats_course.pdf') }}">
+          <button class="btn btn-primary"><i class="fas fa-file-pdf"></i> resultats_course.pdf</button>
+        </a> est correct avant de passer à l'étape suivante
+      </li>
+      <li>
+        <strong>Archiver</strong> la course en cliquant sur le bouton <button class="btn btn-warning btn-sm" disabled><i class="fas fa-database"></i> Archiver</button>
+      . Attention, cette action efface tous les coureurs et leurs passages de la base de données.
+      </li>
+      <li>
+        <strong>Partager</strong> les résultats de la course archivée à l'aide d'un QR code en cliquant sur le bouton
+        <button class="btn btn-primary btn-sm" disabled><i class="fas fa-step-forward"></i> Etape #8</button>
+      </li>
+    </ol>
   </p>
 </div>
-<div class="row">
-  <pre><code>$ nano /home/pi/enduro/client_lecteur/config.py</code></pre>
-</div>
-<div class="row">
-  <p class="card-text font-italic">Pour lancer le logiciel associé au lecteur code-barre 1, ouvrir un terminal console et entrer les commandes suivantes :</p>
-</div>
-<div class="row">
-  <pre><code>$ cd /home/pi/enduro/client_lecteur
-$ ./lecteur_codebarre.py 1</code></pre>
-</div>
-<div class="row">
-  <p class="card-text font-italic">Pour lancer le logiciel associé au lecteur code-barre 2, ouvrir un terminal console et entrer les commandes suivantes :</p>
-</div>
-<div class="row">
-  <pre><code>$ cd /home/pi/enduro/client_lecteur
-$ ./lecteur_codebarre.py 2</code></pre>
-</div>
-<div class="row">
-  <p class="card-text font-italic">Pour lancer le logiciel IHM, ouvrir un terminal console et entrer les commandes suivantes :</p>
-</div>
-<div class="row">
-  <pre><code>$ cd /home/pi/enduro/client_lecteur
-$ ./lecteur_ihm_simple.py</code></pre>
-</div>
 <br />
 
-
-<!-- Derniers passage de badge via lecteur code-barre associés au Rasbperry PI -->
 <div class="row">
-  <h3>Tests</h3>
+  <h3>Liste des courses</h3>
 </div>
 <div class="row">
-  <p class="card-text font-italic">Derniers passages enregistrés dans la base de données. Le bouton ci-dessous permet d'effacer tous les passages enregistrés
-  dans la base de données et réinitialiser les statistiques des coureurs. A utiliser avec précaution car potentiellement il peut tout perdre d'une course.</p>
-</div>
-<div class="row">
-  <a href="{{ url_for('administrer_courses_reinitialiser', id_course=session.id_course_active) }}">
-    <button class="btn btn-danger btn-sm">
-      <i class="fas fa-skull-crossbones"></i> Supprimer tous les passages
-      <span class="badge badge-light">id={{ session.id_course_active }}</span>
-    </button>
-  </a>
-</div><!-- row -->
-<br />
-
-
-<div class="row">
+  <p class="font-italic">Liste des courses dans la base de données.</p>
   <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Numéro R.PI</th>
-        <th>Nom</th>
-        <th>Prénom</th>
-        <th>Classe</th>
-        <th>Temps</th>
-        <th>Nb tours</th>
-      </tr></thead>
-    <tbody id="derniers_passages">
+    <thead><tr><th>ID</th><th>Date</th><th>Nom</th><th>Active</th><th>Archive</th><th>Coureurs</th><th>Passages</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% if les_courses %}
+      {% for une_course in les_courses %}
+        <tr>
+          <td>{{ une_course[0] }}</td><!-- id -->
+          <td>{{ une_course[1] }}</td><!-- date -->
+          <td>{{ une_course[2] }}</td><!-- nom -->
+          {% if une_course[3] == 0 %}
+            <td><i class="far fa-square"></i></td><!-- active -->
+          {% else %}
+            <td><i class="far fa-check-square"></i></td><!-- active -->
+          {% endif %}
+          {% if une_course[4] == 0 %}
+            <td><i class="fas fa-lock-open"></i></td><!-- archive -->
+          {% else %}
+            <td><i class="fas fa-lock"></i></td><!-- archive -->
+          {% endif %}
+          <td>{{ une_course[5] }}</td><!-- nb coureurs -->
+          <td>{{ une_course[6] }}</td><!-- nb passages -->
+          <td>
+          {% if une_course[4] == 1 %}
+            <button class="btn btn-success btn-sm" disabled><i class="fas fa-file-export"></i> Exporter</button>
+            <button class="btn btn-warning btn-sm" disabled><i class="fas fa-database"></i> Archiver</button>
+          {% else %}
+            <a href="{{ url_for('administrer_courses_exporter', id_course=une_course[0]) }}">
+              <button class="btn btn-success btn-sm"><i class="fas fa-file-export"></i> Exporter</button>
+            </a>
+            <a href="{{ url_for('administrer_courses_archiver', id_course=une_course[0]) }}">
+              <button class="btn btn-warning btn-sm"><i class="fas fa-database"></i> Archiver</button>
+            </a>
+          {% endif %}
+
+          </td>
+        </tr>
+      {% endfor %}
+    {% endif %}
     </tbody>
   </table>
 </div><!-- row -->
@@ -164,14 +112,12 @@ $ ./lecteur_ihm_simple.py</code></pre>
       <button class="btn btn-primary btn-sm"><i class="fas fa-step-backward"></i> Etape #4</button>
     </a>
   </div><!-- col -->
-  <div class="col-sm">
+  <div class="col-sm text_right">
     <a href="{{ url_for('administrer_tutoriel_etape6') }}">
       <button class="btn btn-primary btn-sm"><i class="fas fa-step-forward"></i> Etape #6</button>
     </a>
   </div><!-- col -->
 </div><!-- row -->
-
-
 
 
 
