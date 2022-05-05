@@ -26,10 +26,6 @@ app.secret_key = app.config["PHRASE_SECRETE"]
 
 # Création et initialisation de la classe Bdd
 configuration = {}
-configuration["host"] = app.config["BDD_HOST"]
-configuration["user"] = app.config["BDD_USER_IHM"]
-configuration["password"] = app.config["BDD_PASSWORD_IHM"]
-configuration["database"] = app.config["BDD_NAME"]
 bdd = Bdd(configuration)
 
 # ==============================================================================
@@ -68,15 +64,15 @@ def afficher_inscription():
 	"""
 	return render_template('public_inscription.html')
 
-@app.route('/inscription')
-def afficher_inscription_etape3():
+@app.route('/inscription/modification')
+def afficher_inscription_modification():
 	"""Fonction pour gérer les inscription
 	@param Aucun
 	@return le template
 	"""
 	return render_template('public_inscription_etape3.html')
 
-@app.route('/inscription')
+@app.route('/inscription/suppression')
 def afficher_inscription_suppression():
 	"""Fonction pour gérer les inscription
 	@param Aucun
@@ -94,12 +90,21 @@ def afficher_credits():
 	return render_template('public_credits.html')
 
 
-@app.route('/inscription', methods=["POST"])
+@app.route('/inscription/recherche', methods=["POST"])
 def recherche_inscrit():
 	"""Fonction pour afficher l'étape 1 de l'inscription
 	@param Aucun
 	@return le template
 	"""
+
+	#Récupération de l'id de la course active 
+	course = None
+	course_active = None
+	try:
+		course = bdd.recuperer_course_active()
+		course_active = course[0][0]
+	except ErreurBdd as erreur:
+		flash("Une erreur est survenue (%s)" % erreur, "danger")
 
 	#Récupération des paramètres de la requête
 	nom_inscrit = request.form["nom_inscrit"]
@@ -109,10 +114,12 @@ def recherche_inscrit():
 	print("nom =>", nom_inscrit)
 	print("prenom =>", prenom_inscrit)
 	print("classe =>", classe_inscrit)
+	print("id_course =>", course_active)
 
 	#Envoie de la requête SQL
+	deja_inscrit = None
 	try:
-		recherche_coureurs = bdd.rechercher_inscrit(nom_inscrit, prenom_inscrit, classe_inscrit)
+		recherche_coureurs = bdd.rechercher_inscrit(nom_inscrit, prenom_inscrit, classe_inscrit, course_active)
 		print(recherche_coureurs)
 		if recherche_coureurs == []:
 			deja_inscrit = False
@@ -125,12 +132,61 @@ def recherche_inscrit():
 	return render_template('public_inscription_etape2.html', deja_inscrit=deja_inscrit)
 
 
-@app.route('/inscription', methods=["POST"])
+@app.route('/inscription/modification', methods=["POST"])
+def inscription_modification():
+	"""Fonction pour gérer la modification
+	@param Aucun
+	@return le template
+	"""
+
+	#Récupération de l'id de la course active 
+	course = None
+	course_active = None
+	try:
+		course = bdd.recuperer_course_active()
+		course_active = course[0][0]
+	except ErreurBdd as erreur:
+		flash("Une erreur est survenue (%s)" % erreur, "danger")
+
+	#Récupération des paramètre de la requête
+	parrainage_modification = request.form["parrainage_modification"]
+	nom_modification = request.form["nom_modification"]
+	prenom_modification = request.form["prenom_modification"]
+	classe_modification = request.form["classe_modification"]
+	print("nom =>", nom_modification)
+	print("prenom =>", prenom_modification)
+	print("classe =>", classe_modification)
+	print("parrrainage =>", parrainage_modification)
+	print("id_course =>", course_active)
+
+	#Envoie de la requête SQL
+	try:
+		modification_coureur = bdd.modifier_coureur(nom_modification, prenom_modification, classe_modification, parrainage_modification, course_active)
+		print(modification_coureur)
+		flash("Votre inscription à été modifié", "success")
+
+	except ErreurBdd as erreur:
+		flash("une erreur est survenue (%s)" % erreur, "danger")
+
+	return render_template('public_inscription_etape3.html')
+
+
+
+@app.route('/inscription/suppression', methods=["POST"])
 def inscription_suppression():
 	"""Fonction pour gérer les inscription
 	@param Aucun
 	@return le template
 	"""
+
+	#Récupération de l'id de la course active 
+	course = None
+	course_active = None
+	try:
+		course = bdd.recuperer_course_active()
+		course_active = course[0][0]
+	except ErreurBdd as erreur:
+		flash("Une erreur est survenue (%s)" % erreur, "danger")
 
 	#Récupératoin des paramètres de la requête
 	nom_inscrit_supr = request.form["nom_inscrit_supr"]
@@ -139,11 +195,13 @@ def inscription_suppression():
 	print("nom =>", nom_inscrit_supr)
 	print("prenom =>", prenom_inscrit_supr)
 	print("classe =>", classe_inscrit_supr)
+	print("id_course =>", course_active)
 
 	#Envoie de la requête SQL
 	try:
-		suppression_coureur = bdd.supprimer_coureur(nom_inscrit_supr, prenom_inscrit_supr, classe_inscrit_supr)
+		suppression_coureur = bdd.supprimer_coureur(nom_inscrit_supr, prenom_inscrit_supr, classe_inscrit_supr, course_active)
 		print(suppression_coureur)
+		flash("Votre inscription à été supprimée", "success")
 
 	except ErreurBdd as erreur:
 		flash("une erreur est survenue (%s)" % erreur, "danger")
@@ -158,6 +216,15 @@ def inscription():
 	@return le template
 	"""
 
+	#Récupération de l'id de la course active 
+	course = None
+	course_active = None
+	try:
+		course = bdd.recuperer_course_active()
+		course_active = course[0][0]
+	except ErreurBdd as erreur:
+		flash("Une erreur est survenue (%s)" % erreur, "danger")
+
 	#Récupération des paramètres de la requête
 	nom_inscription = request.form["nom_inscription"]
 	prenom_inscription = request.form["prenom_inscription"]
@@ -167,16 +234,18 @@ def inscription():
 	print("prenom =>", prenom_inscription)
 	print("classe =>", classe_inscription)
 	print("parrrainage =>", parrainage_inscription)
+	print("id_course =>", course_active)
 
 	#Envoie de la requête SQL
 	try:
-		coureurs_inscription_en_cours = bdd.coureurs_inscription(nom_inscription, prenom_inscription, classe_inscription, parrainage_inscription)
+		coureurs_inscription_en_cours = bdd.coureurs_inscription(nom_inscription, prenom_inscription, classe_inscription, parrainage_inscription, course_active)
 		print(coureurs_inscription_en_cours)
+		flash("Vous êtes inscrit pour l'Enduro", "success")
 
 	except ErreurBdd as erreur:
 		flash("Une erreur est survenue (%s)" % erreur, "danger")
 	
-	return render_template('public_inscription.html')
+	return render_template('public_inscription_etape2.html')
 
 
 # ==============================================================================
@@ -197,7 +266,6 @@ def administrer_tutoriel_etape1():
 	return render_template('admin_tutoriel_etape1.html')
 
 
-
 @app.route('/administration/tutoriel/etape2')
 def administrer_tutoriel_etape2():
 	"""Fonction pour l'étape #2 du tutoriel d'administration
@@ -209,22 +277,15 @@ def administrer_tutoriel_etape2():
 		flash("Vous devez vous authentifier pour accéder à cette page", "danger")
 		return redirect(url_for("afficher_accueil_admin"))
 
-	# Liste les logiciels à vérifier
-	logiciels = {}
-	logiciels["apache2"] = 0
-	logiciels["sqlite3"] = 0
-	logiciels["mosquitto"] = 0
-	logiciels["serveur_mqtt.py"] = 0
-
-	# Boucle de verification
-	print(psutil.process_iter())
-	for proc in psutil.process_iter():
-		for clef in logiciels.keys():
-			if proc.name() == clef:
-				logiciels[clef] = 1
+	# Récupération de toutes les courses dans la bdd
+	try:
+		les_courses = bdd.recuperer_courses_toutes()
+		print(les_courses)
+	except ErreurBdd as erreur:
+		flash("Une erreur est survenue (%s)" % erreur, "danger")
 
 	# On retourne les résultats intégrés au template
-	return render_template('admin_tutoriel_etape2.html', logiciels=logiciels)
+	return render_template('admin_tutoriel_etape2.html', les_courses=les_courses)
 
 
 
@@ -239,16 +300,15 @@ def administrer_tutoriel_etape3():
 		flash("Vous devez vous authentifier pour accéder à cette page", "danger")
 		return redirect(url_for("afficher_accueil_admin"))
 
-	# Récupération de toutes les courses dans la bdd
+	# Récupération des courses récentes
+	les_courses = None
 	try:
-		les_courses = bdd.recuperer_courses_toutes()
-		print(les_courses)
-	except ErreurBdd as erreur:
-		flash("Une erreur est survenue (%s)" % erreur, "danger")
+		les_courses = bdd.recuperer_courses_recentes()
+	except ErreurBdd as e:
+		flash("Une erreur est survenue (%s)" % e, "danger")
 
-	# On retourne les résultats intégrés au template
+	# On retourne le template
 	return render_template('admin_tutoriel_etape3.html', les_courses=les_courses)
-
 
 
 @app.route('/administration/tutoriel/etape4')
@@ -262,20 +322,14 @@ def administrer_tutoriel_etape4():
 		flash("Vous devez vous authentifier pour accéder à cette page", "danger")
 		return redirect(url_for("afficher_accueil_admin"))
 
-	# Récupération des courses récentes
-	#try:
-	#	les_courses = bdd.recuperer_courses_recentes()
-	#except ErreurBdd as e:
-	#	flash("Une erreur est survenue (%s)" % e, "danger")
-
 	# On retourne le template
-	return render_template('admin_tutoriel_etape4.html')#, les_courses=les_courses)
+	return render_template('admin_tutoriel_etape4.html')
 
 
 
 @app.route('/administration/tutoriel/etape5')
 def administrer_tutoriel_etape5():
-	"""Fonction pour l'étape #5 du tutoriel d'administration
+	"""Fonction pour l'étape #6 du tutoriel d'administration
 	@param Aucun
 	@return template
 	"""
@@ -284,14 +338,22 @@ def administrer_tutoriel_etape5():
 		flash("Vous devez vous authentifier pour accéder à cette page", "danger")
 		return redirect(url_for("afficher_accueil_admin"))
 
-	# On retourne le template
-	return render_template('admin_tutoriel_etape5.html')
+	# Récupération de toutes les courses dans la bdd
+	les_courses = None
+	try:
+		les_courses = bdd.recuperer_courses_toutes()
+		print(les_courses)
+	except ErreurBdd as erreur:
+		flash("Une erreur est survenue (%s)" % erreur, "danger")
+
+	# On retourne les résultats intégrés au template
+	return render_template('admin_tutoriel_etape5.html', les_courses=les_courses)
 
 
 
 @app.route('/administration/tutoriel/etape6')
 def administrer_tutoriel_etape6():
-	"""Fonction pour l'étape #6 du tutoriel d'administration
+	"""Fonction pour l'étape #7 du tutoriel d'administration
 	@param Aucun
 	@return template
 	"""
@@ -302,45 +364,6 @@ def administrer_tutoriel_etape6():
 
 	# On retourne les résultats intégrés au template
 	return render_template('admin_tutoriel_etape6.html')
-
-
-
-@app.route('/administration/tutoriel/etape7')
-def administrer_tutoriel_etape7():
-	"""Fonction pour l'étape #7 du tutoriel d'administration
-	@param Aucun
-	@return template
-	"""
-	# Vérification de l'authentification et redirection si pas bon
-	if "authentifie" not in session:
-		flash("Vous devez vous authentifier pour accéder à cette page", "danger")
-		return redirect(url_for("afficher_accueil_admin"))
-
-	# Récupération de toutes les courses dans la bdd
-	try:
-		les_courses = bdd.recuperer_courses_toutes()
-		print(les_courses)
-	except ErreurBdd as erreur:
-		flash("Une erreur est survenue (%s)" % erreur, "danger")
-
-	# On retourne les résultats intégrés au template
-	return render_template('admin_tutoriel_etape7.html', les_courses=les_courses)
-
-
-
-@app.route('/administration/tutoriel/etape8')
-def administrer_tutoriel_etape8():
-	"""Fonction pour l'étape #8 du tutoriel d'administration
-	@param Aucun
-	@return template
-	"""
-	# Vérification de l'authentification et redirection si pas bon
-	if "authentifie" not in session:
-		flash("Vous devez vous authentifier pour accéder à cette page", "danger")
-		return redirect(url_for("afficher_accueil_admin"))
-
-	# On retourne les résultats intégrés au template
-	return render_template('admin_tutoriel_etape8.html')
 
 @app.route('/administration')
 def afficher_accueil_admin():
@@ -391,6 +414,55 @@ def administrer_logout():
 
 	# On redirige l'utilisateur vers la page d'accueil
 	return redirect(url_for("afficher_accueil_admin"))
+
+
+@app.route('/direct/dernierstests')
+def recuperer_derniers_passages_course_test():
+	"""Fonction pour générer depuis la base de données les statistiques de la course
+	@param Aucun
+	@return Les données en JSON
+
+	Format des données : (date, nom, prenom, classe, dernier_temps, distance_totale, numero_raspberry)
+	"""
+	# Récupération de l'id de la course active
+	if "id_course_active" not in session:
+		try:
+			course_active = bdd.recuperer_course_active()
+			session["id_course_active"] = course_active[0][0]
+		except ErreurBdd as erreur:
+			statistiques["erreur"] = "Une erreur est survenue (%s)" % erreur.message
+			return jsonify(statistiques)
+
+	# Récupération de toutes les courses dans la bdd
+	derniers_passages = None
+	try:
+		derniers_passages = bdd.recuperer_derniers_passages_de_test(session["id_course_active"], 7)
+		#print(derniers_passages)
+	except ErreurBdd as erreur:
+		flash("Une erreur est survenue (%s)" % erreur.message, "danger")
+
+	# Préparation du dictionnaire
+	les_passages = []
+	if derniers_passages is not None:
+		for un_passage in derniers_passages:
+			un_passage_dict = {}
+			un_passage_dict["date"] = un_passage[0]
+			un_passage_dict["nom"] = un_passage[1]
+			un_passage_dict["prenom"] = un_passage[2]
+			un_passage_dict["classe"] = un_passage[3]
+			un_passage_dict["temps"] = formater_temps(un_passage[4])
+			un_passage_dict["distance"] = un_passage[5]
+			un_passage_dict["numero_raspberry"] = un_passage[6]
+			les_passages.append(un_passage_dict)
+
+	def convertisseur(donnee):
+	    if isinstance(donnee, datetime):
+	        return donnee.__str__()
+	derniers_passages_en_json = json.dumps(les_passages, default=convertisseur)
+	print(derniers_passages_en_json)
+
+	# Plutôt json.dumps que jsonify car erreur avec les tableaux
+	return Response(derniers_passages_en_json, mimetype='application/json')
 
 
 @app.route('/administration/courses')
@@ -478,7 +550,7 @@ def administrer_courses_supprimer(id_course):
 		flash("Une erreur est survenue (%s)" % erreur, "danger")
 
 	# On redirige l'utilisateur vers la page d'accueil
-	return redirect(url_for("administrer_tutoriel_etape3"))
+	return redirect(url_for("administrer_tutoriel_etape2"))
 
 @app.route('/administration/courses/choisir/<int:id_course>')
 def administrer_courses_choisir(id_course):
@@ -499,7 +571,7 @@ def administrer_courses_choisir(id_course):
 		flash("Une erreur est survenue (%s)" % e, "danger")
 
 	# On redirige l'utilisateur vers la page d'accueil
-	return redirect(url_for("administrer_tutoriel_etape3"))
+	return redirect(url_for("administrer_tutoriel_etape2"))
 
 
 
@@ -521,7 +593,7 @@ def administrer_courses_archiver(id_course):
 		flash("Une erreur est survenue (%s)" % e, "danger")
 
 	# On redirige l'utilisateur vers la page d'accueil
-	return redirect(url_for("administrer_tutoriel_etape7"))
+	return redirect(url_for("administrer_tutoriel_etape6"))
 
 
 
@@ -545,7 +617,7 @@ def administrer_courses_exporter(id_course):
 		flash("Une erreur est survenue (%s)" % e, "danger")
 
 	# On redirige l'utilisateur vers la page d'accueil
-	return redirect(url_for("administrer_tutoriel_etape8"))
+	return redirect(url_for("administrer_tutoriel_etape7"))
 
 	# Export HTML
 	# Exportation des résultats de la course en HTML
@@ -577,7 +649,7 @@ def administrer_courses_reinitialiser(id_course):
 		flash("Une erreur est survenue (%s)" % e, "danger")
 
 	# On redirige l'utilisateur vers la page d'accueil
-	return redirect(url_for("administrer_tutoriel_etape5"))
+	return redirect(url_for("administrer_tutoriel_etape4"))
 
 @app.route('/administration/coureurs')
 def administrer_coureurs():
@@ -625,6 +697,38 @@ def administrer_coureurs_afficher():
 
 	return render_template('admin_coureurs_afficher.html', les_courses=les_courses, les_coureurs=les_coureurs)
 
+
+@app.route('/resultats/<filename>')
+def telecharger_fichier_pdf(filename):
+	""" Fonction qui permet de télécharger un fichier PDF
+	@param Aucun
+	@return Le template
+	"""
+	return send_from_directory(
+		app.config["CHEMIN_VERS_DOWNLOADS_CSV"],
+		"resultats_course.pdf",
+		mimetype="application/pdf",
+		as_attachment=True,
+		attachment_filename="resultats_course.pdf"
+	)
+
+
+
+@app.route('/resultats/<filename>')
+def telecharger_fichier_csv(filename):
+	""" Fonction qui permet de télécharger un fichier CSV
+	@param Aucun
+	@return Le template
+	"""
+	return send_from_directory(
+		app.config["CHEMIN_VERS_DOWNLOADS_CSV"],
+		"resultats_course.csv",
+		mimetype='text/csv',
+		as_attachment=True,
+		attachment_filename="resultats_course.csv"
+	)
+
+
 @app.route("/administration/coureurs/importer", methods=["POST"])
 def administrer_coureurs_importer():
 	"""Fonction pour importer des coureurs depuis un fichier CSV
@@ -639,14 +743,14 @@ def administrer_coureurs_importer():
 	# Récupération de la course concernée
 	if "id_course_active" not in session:
 		flash("Vous n'avez pas sélectionné de course active à l'étape précédente", "danger")
-		return redirect(url_for("administrer_tutoriel_etape3"))
+		return redirect(url_for("administrer_tutoriel_etape2"))
 	else:
 		id_course = session["id_course_active"]
 
 	# Vérification si le fichier a bien été envoyé
 	if "fichier_csv" not in request.files:
 		flash("Aucun fichier envoyé", "danger")
-		return redirect(url_for("administrer_tutoriel_etape4"))
+		return redirect(url_for("administrer_tutoriel_etape3"))
 
 	# Récupération du fichier CSV
 	fichier_csv = request.files["fichier_csv"]
@@ -654,7 +758,7 @@ def administrer_coureurs_importer():
 	# Si l'utilisateur n'a pas sélectionné de fichier => envoi vide
 	if fichier_csv.filename == "":
 		flash("Aucun fichier sélectionné", "danger")
-		return redirect(url_for("administrer_tutoriel_etape4"))
+		return redirect(url_for("administrer_tutoriel_etape3"))
 
 	if fichier_csv:
 		# Enregistrement en local du fichier CSV
@@ -671,45 +775,10 @@ def administrer_coureurs_importer():
 
 	else:
 		flash("Fichier CSV inexistant", "danger")
-		return redirect(url_for("administrer_tutoriel_etape4"))
+		return redirect(url_for("administrer_tutoriel_etape3"))
 
 	# Redirection vers une autre route/URL
-	return redirect(url_for("administrer_tutoriel_etape4"))
-
-# Route vers la page d'administration
-@app.route("/administration/logiciels")
-def administrer_logiciels_lister():
-	"""Fonction pour lister si les logiciels sont bien lancés
-	@param Aucun
-	@return template + flash
-	"""
-	# Vérification de l'authentification et redirection si pas bon
-	if "authentifie" not in session:
-		flash("Vous devez vous authentifier pour accéder à cette page", "danger")
-		return redirect(url_for("afficher_accueil_admin"))
-
-	# Liste les logiciels à vérifier
-	logiciels = {}
-	logiciels["apache2"] = {}
-	logiciels["sqlite3"] = {}
-	logiciels["mosquitto"] = {}
-	logiciels["serveur_mqtt.py"] = {}
-
-	# Boucle de verification
-	"""
-	print(psutil.process_iter())
-	for proc in psutil.process_iter():
-		for clef in logiciels.keys():
-			if proc.name() == clef:
-				logiciels[clef]["lance"] = 1
-				logiciels[clef]["cpu"] = proc.cpu_percent()
-			else:
-				logiciels[clef]["lance"] = 0
-				logiciels[clef]["cpu"] = -1
-	"""
-	# On retourne les résultats intégrés au template
-	return render_template('admin_logiciels.html', logiciels=logiciels)
-
+	return redirect(url_for("administrer_tutoriel_etape3"))
 
 
 # ==============================================================================
