@@ -1,0 +1,56 @@
+<!-- On va dériver la layout.html de base -->
+{% extends "public_layout.html" %}
+
+
+{% block javascript %}    <!-- Début du block javascript -->
+{% endblock %}  <!-- Fin du block javascript -->
+
+
+{% block body %}    <!-- Début du block body -->
+
+
+<!-- Bandeau pour erreurs et notifications -->
+<div class="row">
+  <div class="col-lg-12">
+    <div id="admin_erreur">
+      {% for category, message in get_flashed_messages(with_categories=true) %}
+      <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+      {% endfor %}
+    </div>
+  </div>
+</div><!-- row -->
+
+<!-- Contenu de la page -->
+<div class="row">
+  <div class="col-lg-12">
+    <div id="admin_donnees">
+      <h1>Accueil</h1>
+      <div class="jumbotron">
+        <p class="text-justify">Le lycée Saint-André organise tous les ans dans le cadre de la semaine des solidarités
+        une course enduro. Au cours de ce temps fort, l’ensemble de la
+        communauté éducative s’implique pour sensibiliser les élèves à toutes les formes de
+        solidarité : locales, nationales, internationales, intergénérationnelles, sociales,
+        économiques, culturelles, ... Des conférences, des ateliers, des expositions, des stands,
+        des sorties et des rencontres avec des partenaires locaux, des actions concrètes
+        menées par les élèves, des repas solidaires au restaurant scolaire ... sont proposés à
+        l’ensemble de la communauté. La course enduro fait partie des manifestations. Près
+        d’un millier de personnes (élèves, enseignants, personnels...) participent à l’événement.
+        Chaque coureur doit se faire parrainer, c’est à dire récolter une certaine somme d’argent
+        en fonction de la distance qu’il parcourra (ex: 1€/km). Le parcours est une boucle
+        autour du lycée d’environ 1km. La session 2017 a comptabilisé 5688 tours.</p>
+        <div class="text-center">
+        <img
+          src="{{ url_for('static', filename='images/plan_lycee_reduit.jpg') }}"
+          class="img-thumbnail"
+        />
+      </div>
+      </div>
+    </div>
+  </div>
+</div><!-- row -->
+
+
+
+
+
+{% endblock %}  <!-- Fin du block body -->

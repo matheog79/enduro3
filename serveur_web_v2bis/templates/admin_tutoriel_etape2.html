@@ -1,0 +1,107 @@
+<!-- On va dériver la layout.html de base -->
+{% extends "admin_layout.html" %}
+
+
+{% block javascript %}    <!-- Début du block javascript -->
+{% endblock %}  <!-- Fin du block javascript -->
+
+
+{% block body %}    <!-- Début du block body -->
+
+
+<!-- Bandeau pour erreurs et notifications -->
+<div class="row">
+    <div class="col-lg-12">
+        <div id="admin_erreur">
+            {% for category, message in get_flashed_messages(with_categories=true) %}
+            <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div><!-- row -->
+
+<!-- Titre -->
+<div class="row">
+  <h1>Etape #2 :: Les logiciels</h1>
+</div><!-- row -->
+
+<!-- Tableau des logiciels -->
+<div class="row">
+  <h3>Etat des logiciels</h3>
+</div><!-- row -->
+<div class="row">
+  <p class="card-text font-italic">Ces logiciels sont nécessaires au bon fonctionnement de la gestion de la course</p>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Nom du logiciel</th>
+        <th>Etat</th>
+      </tr></thead>
+    <tbody>
+    {% for clef,valeur in logiciels.items() %}
+      <tr>
+        <td>{{ clef }}</td>
+        {% if valeur == 1 %}
+        <td><i class="fas fa-check-circle" style="color:green"></i></td>
+        {% else %}
+        <td><i class="fas fa-exclamation-triangle" style="color:red"></i></td>
+        {% endif %}
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div><!-- row -->
+<br />
+
+
+<div class="row">
+  <h3>Procédure pour le (re)lancement</h3>
+</div><!-- row -->
+<div class="row">
+  <p class="card-text font-italic">Pour lancer (ou relancer) <strong>apache2</strong></p>
+</div><!-- row -->
+<div class="row">
+  <pre><code>$ sudo systemctl restart apache2</code></pre>
+</div><!-- row -->
+
+<div class="row">
+  <p class="card-text font-italic">Pour lancer (ou relancer) <strong>sqlite3</strong></p>
+</div><!-- row -->
+<div class="row">
+  <pre><code>$ sudo systemctl restart sqlite3</code></pre>
+</div><!-- row -->
+
+<div class="row">
+  <p class="card-text font-italic">Pour lancer (ou relancer) <strong>mosquitto</strong></p>
+</div><!-- row -->
+<div class="row">
+  <pre><code>$ sudo systemctl restart mosquitto</code></pre>
+</div><!-- row -->
+
+<div class="row">
+  <p class="card-text font-italic">Pour lancer <strong>serveur_mqtt.py</strong></p>
+</div><!-- row -->
+<div class="row">
+  <pre><code>$ cd /home/etudiant/enduro/client_lecteur
+$ ./serveur_mqtt.py</code></pre>
+</div><!-- row -->
+<br />
+
+
+<!-- Les boutons étapes suivante et précédente -->
+<div class="row">
+  <div class="col-sm">
+    <a href="{{ url_for('administrer_tutoriel_etape1') }}">
+      <button class="btn btn-primary btn-sm"><i class="fas fa-step-backward"></i> Etape #1</button>
+    </a>
+  </div><!-- col -->
+  <div class="col-sm">
+    <a href="{{ url_for('administrer_tutoriel_etape3') }}">
+      <button class="btn btn-primary btn-sm"><i class="fas fa-step-forward"></i> Etape #3</button>
+    </a>
+  </div><!-- col -->
+</div><!-- row -->
+
+
+
+{% endblock %}  <!-- Fin du block body -->

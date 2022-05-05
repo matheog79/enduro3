@@ -1,0 +1,182 @@
+<!-- On va deriver la layout.html de base -->
+{% extends "public_layout.html" %}
+
+
+{% block javascript %}    <!-- Debut du block javascript -->
+
+<script>
+
+/**
+ * Fonction pour gerer recuperer et afficher les statistiques
+ */
+function recuperer_dernieres_informations() {
+
+  $.ajax({
+    url: "{{ url_for('bpMG.recuperer_dernieres_informations') }}",
+  })
+    .done(function( data ) {
+      console.log(data);
+
+      // Gestion de l'erreur
+      if (data.erreur.length > 0) {
+        $("#admin_erreur").html("<div class=\"alert alert-danger\" role=\"alert\">" + data.erreur + "</div>");
+      }
+
+      // Gestion des statistiques globales de la course
+      $("#distance_totale").html("<strong>" + data.distance_totale + "</strong> tour(s)");
+      $("#argent_total").html("<strong>" + data.argent_total + "</strong> €");
+      $("#nb_coureurs").html("<strong>" + data.nb_coureurs + "</strong>");
+
+      $("#coureur_rapide_nom_prenom").html(data.coureur_rapide_nom + " " + data.coureur_rapide_prenom);
+      $("#coureur_rapide_temps").html("<strong>" + data.coureur_rapide_temps + "</strong>");
+
+      $("#coureur_endurant_nom_prenom").html(data.coureur_endurant_nom + " " + data.coureur_endurant_prenom);
+      $("#coureur_endurant_tours").html("<strong>" + data.coureur_endurant_tours + "</strong> tours");
+
+      // Gestion des derniers passages dans la course
+      $("#derniers_passages").html("");
+      $.each(data.derniers_passages, function(index, element) {
+        $("#derniers_passages").append(
+          "<tr>" +
+            "<td>" + element.date.substr(11) + "</td>" +  // on isole l'heure de la date
+            "<td>" + element.nom + "</td>" +
+            "<td>" + element.prenom + "</td>" +
+            "<td>" + element.classe + "</td>" +
+            "<td>" + element.temps + "</td>" +
+            "<td>" + element.distance + "</td>" +
+          "</tr>");
+      });
+    });
+}
+
+
+
+/**
+ * Fonction pour gerer la mise a jour de la page
+ */
+function mettre_a_jour() {
+  recuperer_dernieres_informations();
+  setTimeout(mettre_a_jour, 1000);
+}
+
+
+// Auchargement de la page on lance la mise a jour des champs automatiquement
+$( document ).ready(function() {
+  mettre_a_jour()
+});
+
+</script>
+{% endblock %}  <!-- Fin du block javascript -->
+
+
+{% block body %}    <!-- Debut du block body -->
+
+<!-- Bandeau pour erreurs et notifications -->
+<div class="row">
+  <div class="col-lg-12">
+    <div id="admin_erreur">
+      {% for category, message in get_flashed_messages(with_categories=true) %}
+      <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+      {% endfor %}
+    </div>
+  </div>
+</div><!-- row -->
+
+<!-- Contenu de la page -->
+  <div class="row">
+    <h1><strong>La course en direct</strong></h1>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <p class="font-italic", > Les statistiques globales sur les <span id="nb_coureurs" class="h5">???</span> coureurs : </p>
+    </div>
+  </div>
+
+    <!-- Tableaux des totaux -->
+  <div class="row">
+    <div class="col">
+      <table class="table table-striped">
+        <tbody>
+          <tr>
+            <td><div class="h4">Distance totale</div></td>
+            <td>
+              <div id="distance_totale" class="h4">??? kms</div>
+            </td>
+          </tr>
+          <tr>
+            <td><div class="h4">Somme totale recoltee</div></td>
+            <td>
+              <div id="argent_total" class="h4"> ??? €</div>
+            </td>
+          </tr>
+          <tr>
+            <td><div class="h4">Nombre total de tours</div></td>
+            <td>
+              <div id="argent_total" class="h4"> ??? </div>
+            </td>
+          </tr>
+          </tbody>
+      </table>
+    </div><!-- col -->
+
+    <!-- Tableaux des coureurs -->
+    <div class="col">
+      <table class="table table-striped">
+        <tbody>
+          <tr>
+            <td><div class="h4">Le/la plus rapide au tour</div></td>
+            <td>
+              <div id="coureur_rapide_nom_prenom" class="h4">???</div>
+            </td>
+            <td><div id="coureur_rapide_temps" class="h4">????</div></td>
+          </tr>
+          <tr>
+            <td><div class="h4">Le/la le plus endurant(e)</div></td>
+            <td>
+              <div id="coureur_endurant_nom_prenom" class="h4">???</div>
+             </td>
+            <td><div id="coureur_endurant_tours" class="h4">? tour(s)</div></td>
+          </tr>
+      <!--<tr>
+            <td>La classe la plus rapide </td>
+            <td>
+              <div id="coureur_rapide_nom_prenom" class="h5">???</div>
+            </td>
+            <td><div id="coureur_rapide_temps" class="h5">??:??</div></td>
+          </tr> -->
+        </tbody>
+      </table>
+    </div><!-- col -->
+  </div><!-- row -->
+
+
+  <!-- Derniers passages de coureurs -->
+  <div class="row">
+    <p class="font-italic">Derniers passages :</p>
+  </div><!-- row -->
+
+  <div class="row">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th style="width: 10%">Date</th>
+          <th style="width: 25%">Nom</th>
+          <th style="width: 25%">Prénom</th>
+          <th style="width: 15%">Classe</th>
+          <th style="width: 15%">Dernier temps</th>
+          <th style="width: 10%">Tour(s)</th>
+        </tr></thead>
+      <tbody id="derniers_passages">
+      </tbody>
+    </table>
+  </div><!-- row -->
+
+
+
+
+
+
+
+
+{% endblock %}  <!-- Fin du block body -->
