@@ -1,0 +1,103 @@
+<!-- On va dériver la layout.html de base -->
+{% extends "admin_layout.html" %}
+
+
+{% block javascript %}    <!-- Début du block javascript -->
+{% endblock %}  <!-- Fin du block javascript -->
+
+
+{% block body %}    <!-- Début du block body -->
+
+
+<!-- Bandeau pour erreurs et notifications -->
+<div class="row">
+  <div class="col-lg-12">
+    <div id="admin_erreur">
+      {% for category, message in get_flashed_messages(with_categories=true) %}
+      <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+      {% endfor %}
+    </div>
+  </div>
+</div><!-- row -->
+
+
+<!-- Titre de la page -->
+<div class="row">
+  <h1>Etape #1 :: installation et configuration</h1>
+</div><!-- row -->
+
+<!-- Explications -->
+<div class="row">
+  <h3>Explications</h2>
+</div>
+<div class="row">
+  <p>La gestion d'une course se déroule en différentes étapes successives.
+     Il est vivement recommandé de suivre les étapes du tutoriel ci-dessous en validant les étapes
+   les unes après les autres.</p>
+   <table class="table table-striped">
+     <thead>
+       <tr><th>Quand</th><th>Quoi</th></tr>
+     </thead>
+     <tbody>
+       <tr>
+         <td><strong>Avant</strong> la course</td>
+         <td>
+          <ol>
+            <li><strong>Configurer</strong> le serveur central et ses logiciels</li>
+            <li><strong>Créer</strong> une nouvelle course (ou utiliser une course déjà existante)</li>
+            <li><strong>Inscription</strong> des coureurs</li>
+            <li><strong>Importer</strong> le fichier CSV comportant les badges des coureurs</li>
+            <li><strong>Configurer</strong> et <strong>Tester</strong> les postes clients Raspberry PI et leurs logiciels</li>
+          </td>
+        </tr>
+       <tr>
+         <td><strong>Après</strong> la course</td>
+         <td>
+          <ol start="6">
+            <li><strong>Archiver</strong> la course</li>
+            <li><strong>Partager</strong> le fichier des résultats de la course</li>
+          </ol>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- Configuration du serveur central -->
+<div class="row">
+  <h3>Configuration du serveur (pc portable)</h2>
+</div>
+<div class="row">
+  <p class="card-text font-italic">Editer et modifier les valeurs dans le fichier config.py</p>
+</div>
+<div class="row">
+  <pre><code>$ nano /home/etudiant/enduro/serveur_central/config.py</code></pre>
+</div>
+<div class="row">
+  <p class="card-text font-italic">Lancer le serveur MQTT (Il faudra le relancer à l'étape #5)</p>
+</div>
+<div class="row">
+  <pre><code>$ cd /home/etudiant/enduro/serveur_central
+$ ./serveur_mqtt.py</code></pre>
+</div>
+<br />
+
+
+<!-- Les boutons étapes suivante et précédente -->
+<div class="row">
+  <div class="col-sm">
+    <a href="{{ url_for('afficher_accueil_admin') }}">
+      <button class="btn btn-primary btn-sm"><i class="fas fa-step-backward"></i> Accueil</button>
+    </a>
+  </div><!-- col -->
+  <div class="col-sm text_right">
+    <a href="{{ url_for('administrer_tutoriel_etape2') }}">
+      <button class="btn btn-primary btn-sm"><i class="fas fa-step-forward"></i> Etape #2</button>
+    </a>
+  </div><!-- col -->
+</div><!-- row -->
+
+
+
+{% endblock %}  <!-- Fin du block body -->

@@ -1,0 +1,141 @@
+<!-- On va dériver la layout.html de base -->
+{% extends "public_layout.html" %}
+
+
+{% block javascript %}    <!-- Début du block javascript -->
+<script>
+  function table_passage() {
+    // Gestion des derniers passages dans la course
+      $("#derniers_passages").html("");
+      $.each(derniers_passages, function(index, element) {
+        $("#derniers_passages").append(
+          "<tr>" +
+            "<td>" + element.nom + "</td>" +
+            "<td>" + element.prenom + "</td>" +
+            "<td>" + element.classe + "</td>" +
+            "<td>" + element.dernier_temps + "</td>" +
+            "<td>" + element.meilleur_temps + "</td>" +
+            "<td>" + element.distance + "</td>" +
+            "<td>" + element.distance + "</td>" +
+          "</tr>");
+      });
+  }
+</script>
+{% endblock %}  <!-- Fin du block javascript -->
+
+
+{% block body %}    <!-- Début du block body -->
+
+ <!-- Bandeau pour erreurs et notifications -->
+<div class="row">
+  <div class="col-lg-12">
+    <div id="admin_erreur">
+      {% for category, message in get_flashed_messages(with_categories=true) %}
+      <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+      {% endfor %}
+    </div>
+  </div>
+</div><!-- row -->
+
+<!-- Contenu de la page -->
+  <div class="row">
+    <h1><strong>Résultats de la course</strong></h1>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <p class="font-italic", > Il y a eu  <span id="nb_coureurs" class="h5"><strong>{{ informations["nb_coureurs"] }}</strong></span> coureurs : </p>
+    </div>
+  </div>
+
+    <!-- Tableaux des totaux -->
+  <div class="row">
+    <div class="col">
+      <table class="table table-striped">
+        <tbody>
+          <tr>
+            <td><div class="h5">Distance totale parcourue</div></td>
+            <td>
+              <div id="distance_totale" class="h5"><strong>{{ informations["distance_totale"]  }}</strong> kms</div>
+            </td>
+          </tr>
+          <tr>
+            <td><div class="h5">Somme totale recoltée</div></td>
+            <td>
+              <div id="argent_total" class="h5"><strong>{{ informations["argent_total"] }}</strong> €</div>
+            </td>
+          </tr>
+          <tr>
+            <td><div class="h5">Nombre total de tours efféctué</div></td>
+            <td>
+              <div id="nombres_tours" class="h5"><strong>{{ informations["nombres_tours"] }}</strong> tours</div>
+            </td>
+          </tr>
+          </tbody>
+      </table>
+    </div><!-- col -->
+
+    <!-- Tableaux des coureurs -->
+    <div class="col">
+      <table class="table table-striped">
+        <tbody>
+          <tr>
+            <td><div class="h5">Le/la plus rapide au tour</div></td>
+            <td>
+              <div id="coureur_rapide_nom_prenom" class="h5"><strong>{{ informations["coureur_rapide_nom"] }} {{ informations["coureur_rapide_prenom"] }}</strong></div>
+            </td>
+            <td><div id="coureur_rapide_temps" class="h5"><strong>{{ informations["coureur_rapide_temps"] }}</strong></div></td>
+          </tr>
+          <tr>
+            <td><div class="h5">Le/la le plus endurant(e)</div></td>
+            <td>
+              <div id="coureur_endurant_nom_prenom" class="h5"><strong>{{ informations["coureur_endurant_nom"] }} {{ informations["coureur_endurant_prenom"] }}</strong></div>
+             </td>
+            <td><div id="coureur_endurant_tours" class="h5"><strong>{{ informations["coureur_endurant_tours"] }}</strong> tour(s)</div></td>
+          </tr>
+          <tr>
+            <td><div class="h5">La classe la plus rapide</div></td>
+            <td>
+              <div id="classe" class="h5"><strong>{{ informations["classe"] }}</strong></div>
+            </td>
+            <td><div id="classe_temps" class="h5"><strong>{{ informations["classe_temps"] }}</strong></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div><!-- col -->
+  </div><!-- row -->
+
+  <div class="row">
+    <table class="table table-striped" style="border-bottom: solid black 2px;">
+      <thead>
+          <tr>
+            <th style="width: 15%">Classement</th>
+            <th style="width: 10%">Nom</th>
+            <th style="width: 10%">Prénom</th>
+            <th style="width: 15%">Classe</th>
+            <th style="width: 15%">Meilleur temps</th>
+            <th style="width: 15%">Tour(s)</th>
+            <th style="width: 15%">Argent récoltés</th>
+          </tr>
+        </thead>
+    </table>
+    <div style="overflow-y: scroll; height: 450px;">
+      <table class="table table-striped">
+        <tbody>
+          {% for un_coureur in coureurs %}
+          <tr>
+            <td style="width: 15%">{{ loop.index }}</td>
+            <td style="width: 10%">{{ un_coureur[1] }}</td>
+            <td style="width: 10%">{{ un_coureur[2] }}</td>
+            <td style="width: 15%">{{ un_coureur[3] }}</td>
+            <td style="width: 15%">{{ un_coureur[4] }}</td>
+            <td style="width: 15%">{{ un_coureur[5] }}</td>
+            <td style="width: 15%">{{ un_coureur[6] * un_coureur[5] }} €</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div><!-- row -->
+
+{% endblock %}  <!-- Fin du block body -->
